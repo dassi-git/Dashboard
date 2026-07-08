@@ -1,0 +1,44 @@
+export const commonOptions = {
+  maintainAspectRatio: false,
+  responsive: true,
+  plugins: {
+    legend: {
+      position: 'bottom' as const,
+      labels: { usePointStyle: true, boxWidth: 10 },
+    },
+    tooltip: { enabled: true },
+  },
+  scales: {
+    x: { ticks: { color: '#334155' }, grid: { color: 'rgba(0,0,0,0.05)' } },
+    y: { ticks: { color: '#334155' }, grid: { color: 'rgba(0,0,0,0.05)' } },
+  },
+};
+
+export const topicsOptions = {
+  ...commonOptions,
+  indexAxis: 'y' as const,
+    scales: {
+    x: { stacked: true, ticks: { color: '#334155' }, grid: { color: 'rgba(0,0,0,0.05)' } },
+    y: { stacked: true, ticks: { color: '#334155' }, grid: { display: false } },
+  },
+};
+
+export const slaOptions = {
+  ...commonOptions,
+  scales: {
+    x: { stacked: false, ticks: { color: '#334155' } },
+    y: { ticks: { color: '#334155' } },
+  },
+};
+
+export const pieOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  layout: { padding: 0 },
+  plugins: {
+    legend: { position: 'bottom' as const, labels: { usePointStyle: true, boxWidth: 10 } },
+    tooltip: { enabled: true },
+  },
+  // no scales for pie/doughnut charts
+  scales: {},
+};
