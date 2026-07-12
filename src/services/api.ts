@@ -50,6 +50,7 @@ export type DashboardDataResponse = {
   charts: ChartData;
   requests: RequestItem[];
   closedRequests: RequestItem[];
+  allRequests: RequestItem[];
 };
 
 type RequestLike = Pick<RequestItem, 'urgent' | 'sla' | 'statusType'>;
@@ -245,7 +246,6 @@ const requestMatchesFilters = (request: RequestItem, filters: DashboardQueryDto)
     if (filters.kpiType === 'sla' && !isSlaViolation(request)) return false;
     if (filters.kpiType === 'new' && !isNewRequest(request)) return false;
     if (filters.kpiType === 'in_progress' && !isInProgressRequest(request)) return false;
-    if (filters.kpiType === 'closed_30d') return false; // handled separately
   }
 
   if (filters.fromDate) {
@@ -307,7 +307,9 @@ const computeChartData = (filteredRequests: RequestItem[], selectedUnit?: string
   };
 };
 
-const computeKpiData = (filteredRequests: RequestItem[]): KpiData => {
+type KpiCounts = Omit<KpiData, 'closedLast30Days'>;
+
+const computeKpiData = (filteredRequests: RequestItem[]): KpiCounts => {
   const total = filteredRequests.length;
   const newRequests = filteredRequests.filter((request) => isNewRequest(request)).length;
   const inProgress = filteredRequests.filter((request) => isInProgressRequest(request)).length;
@@ -340,7 +342,7 @@ export async function getDashboardData(filters: DashboardQueryDto): Promise<Dash
   };
 
   const kpiRequests = getVisibleRequests().filter((request) => requestMatchesFilters(request, kpiFilters));
-  const chartRequests = getVisibleRequests().filter((request) => requestMatchesFilters(request, filters));
+  const visibleChartRequests = getVisibleRequests().filter((request) => requestMatchesFilters(request, filters));
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -351,15 +353,21 @@ export async function getDashboardData(filters: DashboardQueryDto): Promise<Dash
     if (unitKey && request.unit !== unitKey) return false;
     return new Date(request.closedAt) >= thirtyDaysAgo;
   });
+
+  const chartRequests = filters.kpiType === 'closed_30d'
+    ? [...visibleChartRequests, ...closedRequests]
+    : visibleChartRequests;
   const closedLast30Days = closedRequests.length;
 
   const chartData = computeChartData(chartRequests, filters.unit);
   const kpiData = computeKpiData(kpiRequests);
+  const allReqs = getAllRequests();
 
   return {
     kpi: { ...kpiData, closedLast30Days },
     charts: chartData,
     requests: chartRequests,
     closedRequests,
+    allRequests: allReqs,
   };
 }

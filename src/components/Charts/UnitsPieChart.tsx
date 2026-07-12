@@ -164,7 +164,7 @@ export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', direction: 'rtl' }}>
                 <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', fontWeight: 700 }}>פירוט פניות מלא לפי יחידה</h3>
                 <button
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => { setIsModalOpen(false); setSearchQuery(''); setIsDropdownOpen(false); }}
                   style={{ background: 'none', border: 'none', fontSize: '1.3rem', color: '#94a3b8', cursor: 'pointer' }}
                   aria-label="Close modal"
                 >

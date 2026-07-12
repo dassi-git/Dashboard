@@ -23,6 +23,16 @@ export const RequestsModal: React.FC<RequestsModalProps> = ({ isOpen, onClose, a
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   useEffect(() => {
+    try {
+      // eslint-disable-next-line no-console
+      console.log('RequestsModal mount', {
+        receivedAllRequests: allRequests?.length ?? null,
+        initialDistrict,
+        initialUnit,
+        initialKpiType,
+      });
+    } catch (e) {}
+
     if (!isOpen) return;
 
     const handleEscape = (event: KeyboardEvent) => {

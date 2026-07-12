@@ -26,6 +26,7 @@ const initialDashboardData: DashboardDataResponse = {
     inProgress: 0,
     urgent: 0,
     slaBreaches: 0,
+    closedLast30Days: 0,
   },
   charts: {
     districtsData: [0, 0, 0, 0],
@@ -39,6 +40,8 @@ const initialDashboardData: DashboardDataResponse = {
     trendData: undefined,
   },
   requests: [],
+  closedRequests: [],
+  allRequests: [],
 };
 
 const hasKpiFilter = (request: { urgent: boolean; sla: boolean; statusType: string }, activeKpi: string | null) => {
@@ -57,6 +60,13 @@ export default function useDashboardData() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRetryKey((current) => current + 1);
+    }, 45 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;

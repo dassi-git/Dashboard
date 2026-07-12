@@ -68,6 +68,12 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
   });
 
   const getInitialActiveFilters = (): FilterType[] => {
+    // debug: log initialKpiType for troubleshooting closed_30d behavior
+    try {
+      // eslint-disable-next-line no-console
+      console.log('useRequestFilters.getInitialActiveFilters initialKpiType', initialFilters?.initialKpiType);
+    } catch (e) {}
+
     if (!initialFilters?.initialKpiType || initialFilters.initialKpiType === 'total') return ['all'];
     if (initialFilters.initialKpiType === 'urgent') return ['urgent'];
     if (initialFilters.initialKpiType === 'sla') return ['sla'];
@@ -98,6 +104,15 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
   }, [draftFilters.generalSearch]);
 
   const filteredRequests = useMemo(() => {
+    try {
+      // eslint-disable-next-line no-console
+      console.log('useRequestFilters: computing filteredRequests', {
+        allRequestsLen: allRequests.length,
+        activeFilters,
+        appliedFilters,
+      });
+    } catch (e) {}
+
     const matchesActiveFilters = (request: RequestItem) => {
       if (activeFilters.includes('all')) return true;
       if (activeFilters.includes('urgent') && !isUrgentRequest(request)) return false;
@@ -165,6 +180,11 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
       const dateB = new Date(b.createdAt || 0).getTime();
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
+
+    try {
+      // eslint-disable-next-line no-console
+      console.log('useRequestFilters: filteredRequests count', sorted.length);
+    } catch (e) {}
 
     return sorted;
   }, [allRequests, activeFilters, appliedFilters, debouncedSearch, sortOrder]);

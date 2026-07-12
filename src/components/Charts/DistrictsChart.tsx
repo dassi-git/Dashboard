@@ -43,7 +43,7 @@ export default function DistrictsChart({ districtsData, onChartClick }: Props) {
   const topLabelsPlugin = {
     id: 'topLabels',
     afterDatasetsDraw(chart: any) {
-      const { ctx, scales } = chart;
+      const { ctx } = chart;
       chart.data.datasets[0].data.forEach((value: number, i: number) => {
         const bar = chart.getDatasetMeta(0).data[i];
         ctx.save();

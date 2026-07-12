@@ -58,6 +58,7 @@ export default function MainLayout() {
     handleKpiSelect,
     isModalOpen,
     setIsModalOpen,
+    data,
     chartData,
     kpiData,
     unitFilteredRequests,
@@ -425,13 +426,31 @@ export default function MainLayout() {
         </section>
       </div>
 
+      {
+        // debug: log counts passed to RequestsModal
+        (() => {
+          try {
+            // eslint-disable-next-line no-console
+            console.log('RequestsModal data counts', {
+              activeKpi,
+              dataRequests: data?.requests?.length ?? null,
+              dataClosed: data?.closedRequests?.length ?? null,
+              unitFiltered: unitFilteredRequests.length,
+            });
+          } catch (e) {
+            // ignore
+          }
+          return null;
+        })()
+      }
+
       <RequestsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        allRequests={unitFilteredRequests}
+        allRequests={data?.requests ?? unitFilteredRequests}
         initialDistrict={selectedDistrict}
         initialUnit={selectedUnit}
-        initialKpiType={activeKpi}
+        initialKpiType={activeKpi === 'closed_30d' ? null : activeKpi}
       />
     </div>
   );
