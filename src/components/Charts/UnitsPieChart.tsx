@@ -4,7 +4,7 @@ import ChartCard from './ChartCard.tsx';
 
 type Props = {
   unitsData: number[];
-  onChartClick?: () => void;
+  onChartClick?: (selection?: { unit?: string; handler?: string } | string) => void;
   hideTableButton?: boolean;
 };
 
@@ -104,6 +104,25 @@ export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton
     },
   };
 
+  const sliceClickPlugin = {
+    id: 'sliceClick',
+    afterEvent(chart: any, args: any) {
+      if (args.event.type !== 'click') return;
+      const points = chart.getElementsAtEventForMode(args.event, 'nearest', { intersect: true }, true);
+      if (points.length === 0) return;
+      
+      const firstPoint = points[0];
+      const idx = firstPoint.index;
+      const label = mainPieData.labels?.[idx];
+      
+      if (label) {
+        // eslint-disable-next-line no-console
+        console.debug('Pie slice clicked:', label);
+        onChartClick?.(String(label));
+      }
+    },
+  };
+
   const titleContent = (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', width: '100%' }}>
       <span>פניות לפי יחידה</span>
@@ -137,8 +156,12 @@ export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton
   return (
     <ChartCard title={titleContent} style={{ height: '100%', minHeight: 0, maxHeight: '100%' }}>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ width: '100%', height: '100%', minHeight: 0, flex: 1, paddingBottom: '8px', cursor: 'pointer' }} onClick={() => onChartClick?.()}>
-          <Pie data={mainPieData} options={mainPieOptions} plugins={[outerLabelsPlugin]} />
+        <div style={{ width: '100%', height: '100%', minHeight: 0, flex: 1, paddingBottom: '8px', cursor: 'pointer' }}>
+          <Pie
+            data={mainPieData}
+            options={mainPieOptions}
+            plugins={[outerLabelsPlugin, sliceClickPlugin]}
+          />
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', paddingBottom: '4px' }}>

@@ -10,6 +10,7 @@ export interface RequestsModalProps {
   allRequests: import('./useRequestFilters').RequestItem[];
   initialDistrict?: string;
   initialUnit?: string;
+  initialHandler?: string;
   initialKpiType?: string | null;
 }
 
@@ -17,21 +18,23 @@ export interface RequestsModalProps {
 
 /* Sidebar and filter styles moved to ModalSidebar */
 
-export const RequestsModal: React.FC<RequestsModalProps> = ({ isOpen, onClose, allRequests, initialDistrict, initialUnit, initialKpiType }) => {
-  const filters = useRequestFilters(allRequests, { initialDistrict, initialUnit, initialKpiType });
+export const RequestsModal: React.FC<RequestsModalProps> = ({ isOpen, onClose, allRequests, initialDistrict, initialUnit, initialHandler, initialKpiType }) => {
+  const filters = useRequestFilters(allRequests, { initialDistrict, initialUnit, initialHandler, initialKpiType });
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    filters.applyFilters();
+  }, [isOpen, filters.appliedFilters.selectedUnits, filters.appliedFilters.selectedHandlers]);
 
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   useEffect(() => {
-    try {
-      // eslint-disable-next-line no-console
-      console.log('RequestsModal mount', {
-        receivedAllRequests: allRequests?.length ?? null,
-        initialDistrict,
-        initialUnit,
-        initialKpiType,
-      });
-    } catch (e) {}
+    console.log('RequestsModal mount', {
+      receivedAllRequests: allRequests?.length ?? null,
+      initialDistrict,
+      initialUnit,
+      initialKpiType,
+    });
 
     if (!isOpen) return;
 

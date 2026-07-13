@@ -3,7 +3,7 @@ import ChartCard from './ChartCard.tsx';
 
 type Props = {
   handlersData: number[];
-  onChartClick?: () => void;
+  onChartClick?: (selection?: { unit?: string; handler?: string } | string) => void;
 };
 
 const handlerLabels = ['תומר', 'גיא', 'נועה', 'עדי', 'רועי'];
@@ -56,12 +56,26 @@ export default function HandlersChart({ handlersData, onChartClick }: Props) {
     },
   };
 
+  const handlerClickPlugin = {
+    id: 'handlerClick',
+    afterEvent(chart: any, args: any) {
+      if (args.event.type !== 'click') return;
+      const points = chart.getElementsAtEventForMode(args.event, 'nearest', { intersect: true }, true);
+      if (points.length === 0) return;
+      const firstPoint = points[0];
+      const label = handlerLabels[firstPoint.index];
+      if (label) {
+        onChartClick?.({ handler: label });
+      }
+    },
+  };
+
   return (
     <ChartCard title="חלוקה לפי גורם מטפלים" style={{ height: '100%', minHeight: 0, maxHeight: '100%' }}>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', justifyContent: 'space-between', boxSizing: 'border-box' }}>
         
         <div style={{ width: '100%', height: '100%', minHeight: 0, flex: 1, position: 'relative' }}>
-          <Bar data={data} options={options} plugins={[topLabelsPlugin]} aria-label="חלוקה לפי גורמי מטפלים" onClick={() => onChartClick?.()} />
+          <Bar data={data} options={options} plugins={[topLabelsPlugin, handlerClickPlugin]} aria-label="חלוקה לפי גורמי מטפלים" />
         </div>
 
         {/* שורת 5 הנקודות הצבעוניות - ממורכזת ומרווחת בצורה בטוחה בתחתית */}

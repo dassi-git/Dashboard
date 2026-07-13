@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import Select from 'react-select';
 import DashboardCharts from '../Charts/DashboardCharts';
 import RequestsModal from '../Modal/RequestsModal';
@@ -57,24 +57,22 @@ export default function MainLayout() {
     activeKpi,
     handleKpiSelect,
     isModalOpen,
-    setIsModalOpen,
     data,
     chartData,
     kpiData,
     unitFilteredRequests,
     closedRequests,
     handleOpenRequests,
+    modalInitialUnit,
+    modalInitialHandler,
+    modalInitialDistrict,
+    closeRequestsModal,
     isLoading,
     error,
     handleRetry,
   } = useDashboardData();
 
   const hasSelectedUnitNoData = !isLoading && !error && selectedUnit !== 'all' && unitFilteredRequests.length === 0;
-
-  // clear unit selection when district changes
-  useEffect(() => {
-    handleUnitSelect('all');
-  }, [selectedDistrict]);
 
   return (
     <div style={pageStyle}>
@@ -426,31 +424,14 @@ export default function MainLayout() {
         </section>
       </div>
 
-      {
-        // debug: log counts passed to RequestsModal
-        (() => {
-          try {
-            // eslint-disable-next-line no-console
-            console.log('RequestsModal data counts', {
-              activeKpi,
-              dataRequests: data?.requests?.length ?? null,
-              dataClosed: data?.closedRequests?.length ?? null,
-              unitFiltered: unitFilteredRequests.length,
-            });
-          } catch (e) {
-            // ignore
-          }
-          return null;
-        })()
-      }
-
       <RequestsModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => closeRequestsModal()}
         allRequests={data?.requests ?? unitFilteredRequests}
-        initialDistrict={selectedDistrict}
-        initialUnit={selectedUnit}
-        initialKpiType={activeKpi === 'closed_30d' ? null : activeKpi}
+        initialDistrict={modalInitialDistrict ?? selectedDistrict}
+        initialUnit={modalInitialUnit ?? selectedUnit}
+        initialHandler={modalInitialHandler}
+        initialKpiType={activeKpi}
       />
     </div>
   );

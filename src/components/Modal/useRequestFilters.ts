@@ -5,11 +5,10 @@ const ALL_SELECTED = 'הכל';
 
 export const unitsRawData = Array.from({ length: 50 }, (_, i) => {
   const id = i + 1;
-  let district = 'מרכז';
-  if (id % 5 === 0) district = 'צפון';
-  else if (id % 5 === 1) district = 'דרום';
-  else if (id % 5 === 2) district = 'ירושלים';
-  else if (id % 5 === 3) district = 'חיפה';
+  let district = 'מערב';
+  if (id <= 12) district = 'צפון';
+  else if (id <= 25) district = 'דרום';
+  else if (id <= 38) district = 'מזרח';
   return { label: `יחידה ${id}`, district };
 });
 
@@ -54,6 +53,7 @@ export interface AdvancedFilterState {
 export interface UseRequestFiltersArgs {
   initialDistrict?: string;
   initialUnit?: string;
+  initialHandler?: string;
   initialKpiType?: string | null;
 }
 
@@ -61,19 +61,18 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
   const buildInitialDraftState = (): AdvancedFilterState => ({
     selectedDistricts: initialFilters?.initialDistrict && initialFilters.initialDistrict !== 'all' ? [initialFilters.initialDistrict] : [],
     selectedUnits: initialFilters?.initialUnit && initialFilters.initialUnit !== 'all' ? [initialFilters.initialUnit] : [],
-    selectedHandlers: [],
+    selectedHandlers: initialFilters?.initialHandler ? [initialFilters.initialHandler] : [],
     generalSearch: '',
     startDate: '',
     endDate: '',
   });
 
-  const getInitialActiveFilters = (): FilterType[] => {
-    // debug: log initialKpiType for troubleshooting closed_30d behavior
-    try {
-      // eslint-disable-next-line no-console
-      console.log('useRequestFilters.getInitialActiveFilters initialKpiType', initialFilters?.initialKpiType);
-    } catch (e) {}
+  const applyInitialFilters = (nextState: AdvancedFilterState) => {
+    setDraftFilters(nextState);
+    setAppliedFilters(nextState);
+  };
 
+  const getInitialActiveFilters = (): FilterType[] => {
     if (!initialFilters?.initialKpiType || initialFilters.initialKpiType === 'total') return ['all'];
     if (initialFilters.initialKpiType === 'urgent') return ['urgent'];
     if (initialFilters.initialKpiType === 'sla') return ['sla'];
@@ -91,9 +90,8 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
   useEffect(() => {
     const nextDraftState = buildInitialDraftState();
     setActiveFilters(getInitialActiveFilters());
-    setDraftFilters(nextDraftState);
-    setAppliedFilters(nextDraftState);
-  }, [initialFilters?.initialDistrict, initialFilters?.initialUnit, initialFilters?.initialKpiType]);
+    applyInitialFilters(nextDraftState);
+  }, [initialFilters?.initialDistrict, initialFilters?.initialUnit, initialFilters?.initialHandler, initialFilters?.initialKpiType]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -104,14 +102,11 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
   }, [draftFilters.generalSearch]);
 
   const filteredRequests = useMemo(() => {
-    try {
-      // eslint-disable-next-line no-console
-      console.log('useRequestFilters: computing filteredRequests', {
-        allRequestsLen: allRequests.length,
-        activeFilters,
-        appliedFilters,
-      });
-    } catch (e) {}
+    console.log('useRequestFilters: computing filteredRequests', {
+      allRequestsLen: allRequests.length,
+      activeFilters,
+      appliedFilters,
+    });
 
     const matchesActiveFilters = (request: RequestItem) => {
       if (activeFilters.includes('all')) return true;
@@ -181,11 +176,7 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
 
-    try {
-      // eslint-disable-next-line no-console
-      console.log('useRequestFilters: filteredRequests count', sorted.length);
-    } catch (e) {}
-
+    console.log('useRequestFilters: filteredRequests count', sorted.length);
     return sorted;
   }, [allRequests, activeFilters, appliedFilters, debouncedSearch, sortOrder]);
 

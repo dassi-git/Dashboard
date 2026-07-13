@@ -30,7 +30,7 @@ export type DashboardChartsProps = {
   slaActivity?: number[];
   slaBreaches?: number[];
   handlersData: number[];
-  onChartClick?: () => void;
+  onChartClick?: (selection?: { unit?: string; handler?: string; district?: string } | string) => void;
 };
 
 const rowStyle: React.CSSProperties = {

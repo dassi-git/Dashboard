@@ -56,6 +56,9 @@ export default function useDashboardData() {
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [activeKpi, setActiveKpi] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalInitialUnit, setModalInitialUnit] = useState<string | undefined>(undefined);
+  const [modalInitialHandler, setModalInitialHandler] = useState<string | undefined>(undefined);
+  const [modalInitialDistrict, setModalInitialDistrict] = useState<string | undefined>(undefined);
   const [data, setData] = useState<DashboardDataResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -133,11 +136,46 @@ export default function useDashboardData() {
 
   const handleUnitSelect = (unitId: string) => setSelectedUnit(unitId as UnitId);
   const handleKpiSelect = (kpiType: string | null) => setActiveKpi((current) => (current === kpiType ? null : kpiType));
-  const handleOpenRequests = () => setIsModalOpen(true);
+  const handleOpenRequests = (selection?: { unit?: string; handler?: string; district?: string } | string) => {
+    if (typeof selection === 'string') {
+      setSelectedUnit(selection);
+      setModalInitialUnit(selection);
+      setModalInitialHandler(undefined);
+      setModalInitialDistrict(undefined);
+    } else if (selection?.unit) {
+      setSelectedUnit(selection.unit);
+      setModalInitialUnit(selection.unit);
+      setModalInitialHandler(undefined);
+      setModalInitialDistrict(undefined);
+    } else if (selection?.handler) {
+      setModalInitialHandler(selection.handler);
+      setModalInitialUnit(undefined);
+      setModalInitialDistrict(undefined);
+    } else if (selection?.district) {
+      setModalInitialUnit(undefined);
+      setModalInitialHandler(undefined);
+      setModalInitialDistrict(selection.district);
+    } else {
+      setModalInitialUnit(undefined);
+      setModalInitialHandler(undefined);
+      setModalInitialDistrict(undefined);
+    }
+    setIsModalOpen(true);
+  };
+
+  const closeRequestsModal = () => {
+    setIsModalOpen(false);
+    setModalInitialUnit(undefined);
+    setModalInitialHandler(undefined);
+    setModalInitialDistrict(undefined);
+    setSelectedUnit('all');
+  };
 
   const handleSetSelectedDistrict = (district: string) => {
     setSelectedDistrict(district);
-    setSelectedUnit('all');
+    if (selectedUnit !== 'all' && selectedUnit && unitDistrictMap[selectedUnit] !== district) {
+      setSelectedUnit('all');
+    }
   };
 
   const handleRetry = () => {
@@ -162,6 +200,10 @@ export default function useDashboardData() {
     uniqueDistricts,
     availableUnits,
     handleOpenRequests,
+    modalInitialUnit,
+    modalInitialHandler,
+    modalInitialDistrict,
+    closeRequestsModal,
     data,
     isLoading,
     error,

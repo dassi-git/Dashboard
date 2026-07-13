@@ -3,7 +3,7 @@ import ChartCard from './ChartCard.tsx';
 
 type Props = {
   districtsData: number[];
-  onChartClick?: () => void;
+  onChartClick?: (selection?: { unit?: string; handler?: string; district?: string } | string) => void;
 };
 
 const districtLabels = ['מערב', 'מזרח', 'דרום', 'צפון'];
@@ -56,12 +56,26 @@ export default function DistrictsChart({ districtsData, onChartClick }: Props) {
     },
   };
 
+  const districtClickPlugin = {
+    id: 'districtClick',
+    afterEvent(chart: any, args: any) {
+      if (args.event.type !== 'click') return;
+      const points = chart.getElementsAtEventForMode(args.event, 'nearest', { intersect: true }, true);
+      if (points.length === 0) return;
+      const firstPoint = points[0];
+      const label = districtLabels[firstPoint.index];
+      if (label) {
+        onChartClick?.({ district: label });
+      }
+    },
+  };
+
   return (
     <ChartCard title="התפלגות לפי מחוז" style={{ height: '100%', minHeight: 0, maxHeight: '100%' }}>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', justifyContent: 'space-between', boxSizing: 'border-box' }}>
         
         <div style={{ width: '100%', height: '100%', minHeight: 0, flex: 1, position: 'relative' }}>
-          <Bar data={data} options={options} plugins={[topLabelsPlugin]} aria-label="התפלגות לפי מחוז" onClick={() => onChartClick?.()} />
+          <Bar data={data} options={options} plugins={[topLabelsPlugin, districtClickPlugin]} aria-label="התפלגות לפי מחוז" />
         </div>
 
         {/* שורת 4 הנקודות המותאמת עבור המחוזות */}

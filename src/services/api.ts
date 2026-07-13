@@ -211,8 +211,8 @@ const initializeDbRequests = () => {
         dbRequests = parsed;
         return;
       }
-    } catch {
-      // Ignore parse errors and fall back to fresh generation.
+    } catch (error) {
+      console.warn('Failed to parse cached dashboard requests:', error);
     }
   }
 
@@ -224,8 +224,8 @@ const initializeDbRequests = () => {
   try {
     localStorage.setItem('dashboard_requests', JSON.stringify(dbRequests));
     localStorage.setItem('dashboard_requests_version', CACHE_VERSION);
-  } catch {
-    // Ignore storage errors and keep the generated data in-memory.
+  } catch (error) {
+    console.warn('Failed to persist dashboard requests to localStorage:', error);
   }
 };
 
@@ -242,6 +242,7 @@ const requestMatchesFilters = (request: RequestItem, filters: DashboardQueryDto)
   if (unitKey && request.unit !== unitKey) return false;
 
   if (filters.kpiType && filters.kpiType !== 'total') {
+    if (filters.kpiType === 'closed_30d') return false;
     if (filters.kpiType === 'urgent' && !isUrgentRequest(request)) return false;
     if (filters.kpiType === 'sla' && !isSlaViolation(request)) return false;
     if (filters.kpiType === 'new' && !isNewRequest(request)) return false;
@@ -355,7 +356,7 @@ export async function getDashboardData(filters: DashboardQueryDto): Promise<Dash
   });
 
   const chartRequests = filters.kpiType === 'closed_30d'
-    ? [...visibleChartRequests, ...closedRequests]
+    ? closedRequests
     : visibleChartRequests;
   const closedLast30Days = closedRequests.length;
 
