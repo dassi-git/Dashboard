@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { Bar } from 'react-chartjs-2';
 import ChartCard from './ChartCard.tsx';
 
@@ -6,14 +6,15 @@ type Props = {
   unitsData?: number[];
   slaActivity?: number[];
   slaBreaches?: number[];
-  onChartClick?: () => void;
+  onChartClick?: (selection?: { unit?: string }) => void;
 };
 
 const unitLabels = Array.from({ length: 50 }, (_, i) => `יחידה ${i + 1}`);
 
 export default function SlaByUnitChart({ unitsData, slaActivity, slaBreaches, onChartClick }: Props) {
-  
-  // 1. Generate stable, highly unbalanced mockup data
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<any>(null);
+
   const sortedItems = useMemo(() => {
     const rawItems = unitLabels.map((label, idx) => {
       const activity = slaActivity?.[idx] ?? (() => {
@@ -22,11 +23,9 @@ export default function SlaByUnitChart({ unitsData, slaActivity, slaBreaches, on
         if (idx % 4 !== 0) return Math.floor(Math.random() * 15) + 5;
         return 0;
       })();
-
       const breach = slaBreaches?.[idx] ?? (activity > 0 ? Math.floor(activity * (0.15 + Math.random() * 0.4)) + 2 : 0);
       return { label, activity, breach };
     });
-
     return rawItems.filter(item => item.activity > 0).sort((a, b) => b.breach - a.breach);
   }, [slaActivity, slaBreaches, unitsData]);
 
@@ -61,6 +60,30 @@ export default function SlaByUnitChart({ unitsData, slaActivity, slaBreaches, on
     indexAxis: 'y' as const,
     maintainAspectRatio: false,
     responsive: true,
+    animation: {
+      duration: 700,
+      easing: 'easeOutQuad' as const,
+      delay: (context: any) => (context.type === 'data' ? context.dataIndex * 10 : 0),
+    },
+    animations: {
+      x: {
+        duration: 700,
+        easing: 'easeOutQuad' as const,
+        from: 0,
+      },
+      y: {
+        duration: 700,
+        easing: 'easeOutQuad' as const,
+        from: 0,
+      },
+      colors: {
+        duration: 500,
+        easing: 'easeOutQuad' as const,
+      },
+    },
+    onHover: (_event: any, elements: any[], chart: any) => {
+      chart.canvas.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+    },
     plugins: { legend: { display: false } },
     layout: {
       padding: { top: 4, right: 8, left: 6, bottom: 8 },
@@ -82,15 +105,60 @@ export default function SlaByUnitChart({ unitsData, slaActivity, slaBreaches, on
     },
   };
 
+  const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const chart = chartRef.current;
+    if (!chart) return;
+
+    // חישוב מיקום יחסי ל-div הפנימי (גובה chartHeight) — לא ל-canvas שעלול ל-bubble
+    const divRect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - divRect.left;
+    const y = e.clientY - divRect.top;
+
+    const yScale = chart.scales['y'];
+    if (!yScale) return;
+
+    let closestIndex = -1;
+    let closestDist = Infinity;
+    const labelCount = data.labels?.length ?? 0;
+
+    for (let i = 0; i < labelCount; i++) {
+      const pixelY = yScale.getPixelForValue(i);
+      const dist = Math.abs(pixelY - y);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closestIndex = i;
+      }
+    }
+
+    const chartArea = chart.chartArea;
+    if (x < chartArea.left || x > chartArea.right) return;
+    if (closestIndex === -1) return;
+
+    const unitLabel = data.labels?.[closestIndex];
+    if (unitLabel) {
+      onChartClick?.({ unit: String(unitLabel) });
+    }
+  };
+
   const chartHeight = data.labels.length === 1 ? 220 : Math.max(220, data.labels.length * 32 + 60);
   const wrapperHeight = Math.min(chartHeight, 280);
 
   return (
-    <ChartCard title="SLA לפי יחידה (פעילות נגד חריגות)" style={{ height: '100%', minHeight: 0, maxHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+    <ChartCard title="SLA לפי יחידה (פעילות נגד חריגות)" style={{ height: '100%', minHeight: 0, maxHeight: '100%', display: 'flex', flexDirection: 'column' }} animationDelay={120} animationDuration={650}>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', minHeight: 0, overflow: 'hidden' }}>
-        <div style={{ height: `${wrapperHeight}px`, overflowY: chartHeight > wrapperHeight ? 'auto' : 'hidden', overflowX: 'hidden', direction: 'ltr' }}>
-          <div style={{ height: chartHeight, minHeight: chartHeight, width: '100%', position: 'relative' }}>
-            <Bar data={data} options={options} onClick={() => onChartClick?.()} />
+        <div
+          ref={scrollContainerRef}
+          style={{ height: `${wrapperHeight}px`, overflowY: chartHeight > wrapperHeight ? 'auto' : 'hidden', overflowX: 'hidden', direction: 'ltr' }}
+        >
+          <div
+            style={{ height: chartHeight, minHeight: chartHeight, width: '100%', position: 'relative', cursor: 'pointer' }}
+            onClick={handleCanvasClick}
+          >
+            <Bar
+              ref={chartRef}
+              data={data}
+              options={options}
+            />
           </div>
         </div>
 
@@ -100,18 +168,7 @@ export default function SlaByUnitChart({ unitsData, slaActivity, slaBreaches, on
           ))}
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '6px',
-            padding: '2px 0 0',
-            borderTop: '1px solid #f1f5f9',
-            flexShrink: 0,
-            backgroundColor: '#fff',
-            boxSizing: 'border-box',
-          }}
-        >
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', padding: '2px 0 0', borderTop: '1px solid #f1f5f9', flexShrink: 0, backgroundColor: '#fff', boxSizing: 'border-box' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', direction: 'rtl' }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#2563eb' }} />
             <span style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 600 }}>פעילות</span>
@@ -125,4 +182,3 @@ export default function SlaByUnitChart({ unitsData, slaActivity, slaBreaches, on
     </ChartCard>
   );
 }
-

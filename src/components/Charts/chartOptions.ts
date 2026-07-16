@@ -35,6 +35,7 @@ export const pieOptions = {
   responsive: true,
   maintainAspectRatio: false,
   layout: { padding: 0 },
+  animation: { duration: 450, easing: 'easeOutQuart' as const, animateRotate: false, animateScale: true },
   plugins: {
     legend: { position: 'bottom' as const, labels: { usePointStyle: true, boxWidth: 10 } },
     tooltip: { enabled: true },

@@ -1,8 +1,4 @@
-import { useState, useMemo } from 'react';
 import type { RequestItem } from '../../services/api';
-import UnitsPieChart from '../Charts/UnitsPieChart';
-import HandlersChart from '../Charts/HandlersChart';
-import SlaByUnitChart from '../Charts/SlaByUnitChart';
 
 function BarChart2Icon({ color }: { color: string }) {
   return (
@@ -64,30 +60,12 @@ type Props = {
   activeKpi: string | null;
   onKpiSelect: (kpiType: string | null) => void;
   closedRequests?: RequestItem[];
+  onOpenClosedRequests?: () => void;
+  transitionVersion?: number;
 };
 
-export default function KpiGrid({ data, activeKpi, onKpiSelect, closedRequests = [] }: Props) {
-  const [isTableOpen, setIsTableOpen] = useState(false);
+export default function KpiGrid({ data, activeKpi, onKpiSelect, onOpenClosedRequests, transitionVersion = 0 }: Props) {
 
-  const unitLabels = Array.from({ length: 50 }, (_, i) => `יחידה ${i + 1}`);
-  const handlerLabels = ['תומר', 'גיא', 'נועה', 'עדי', 'רועי'];
-
-  const closedUnitsData = useMemo(
-    () => unitLabels.map((u) => closedRequests.filter((r) => r.unit === u).length),
-    [closedRequests]
-  );
-  const closedHandlersData = useMemo(
-    () => handlerLabels.map((h) => closedRequests.filter((r) => r.handler === h).length),
-    [closedRequests]
-  );
-  const closedSlaActivity = useMemo(
-    () => unitLabels.map((u) => closedRequests.filter((r) => r.unit === u).length),
-    [closedRequests]
-  );
-  const closedSlaBreaches = useMemo(
-    () => unitLabels.map((u) => closedRequests.filter((r) => r.unit === u && r.sla).length),
-    [closedRequests]
-  );
   const cardsData = [
     {
       id: 'total',
@@ -196,7 +174,20 @@ export default function KpiGrid({ data, activeKpi, onKpiSelect, closedRequests =
                   <IconComponent color={isActive ? theme.activeText : theme.defaultIconColor} />
                 </div>
               </div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: isActive ? theme.activeText : theme.defaultNumberColor, marginTop: '1px', lineHeight: 1 }}>
+              <div
+                key={`value-${transitionVersion}-${card.id}`}
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 700,
+                  color: isActive ? theme.activeText : theme.defaultNumberColor,
+                  marginTop: '1px',
+                  lineHeight: 1,
+                  transition: 'opacity 360ms ease, transform 360ms ease, color 360ms ease',
+                  willChange: 'opacity, transform',
+                  opacity: 1,
+                  transform: 'translateY(0)',
+                }}
+              >
                 {card.value}
               </div>
             </div>
@@ -228,67 +219,25 @@ export default function KpiGrid({ data, activeKpi, onKpiSelect, closedRequests =
           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: activeKpi === 'closed_30d' ? '#16a34a' : '#475569' }}>נסגרו ב-30 יום האחרונים</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#16a34a' }}>{data.closedLast30Days}</span>
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); setIsTableOpen(true); }}
-            style={{ fontSize: '0.7rem', fontWeight: 700, color: '#16a34a', background: '#dcfce7', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '2px 8px', cursor: 'pointer' }}
+          <span
+            key={`closed-${transitionVersion}`}
+            style={{
+              fontSize: '1.1rem',
+              fontWeight: 700,
+              color: '#16a34a',
+              transition: 'opacity 360ms ease, transform 360ms ease',
+              willChange: 'opacity, transform',
+              opacity: 1,
+              transform: 'translateY(0)',
+            }}
           >
-            פתח טבלה
-          </button>
+            {data.closedLast30Days}
+          </span>
+
         </div>
       </div>
 
-      {isTableOpen && (
-        <div
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.35)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem' }}
-          onClick={() => setIsTableOpen(false)}
-        >
-          <div
-            style={{ width: '100%', maxWidth: '1100px', maxHeight: '90vh', backgroundColor: '#ffffff', borderRadius: '20px', boxShadow: '0 8px 24px rgba(2,6,23,0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column', direction: 'rtl' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>פניות שנסגרו ב-30 יום האחרונים ({closedRequests.length})</div>
-              <button type="button" onClick={() => setIsTableOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.1rem', color: '#64748b', cursor: 'pointer' }}>סגור</button>
-            </div>
-            <div style={{ overflowY: 'auto', flex: 1 }}>
-              <div style={{ padding: '1rem' }}>
-                {/* גרפים */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '1.25rem', height: '220px', flexShrink: 0 }}>
-                  <UnitsPieChart unitsData={closedUnitsData} hideTableButton />
-                  <HandlersChart handlersData={closedHandlersData} />
-                  <SlaByUnitChart slaActivity={closedSlaActivity} slaBreaches={closedSlaBreaches} unitsData={closedUnitsData} />
-                </div>
-              </div>
-              {/* טבלה בלי padding כדי ש-sticky יעבוד */}
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr>
-                    {['מספר פנייה', 'מטופל', 'נושא', 'יחידה', 'מחוז', 'מטפל', 'תאריך פתיחה', 'תאריך סגירה'].map((h) => (
-                      <th key={h} style={{ textAlign: 'right', padding: '10px 14px', fontSize: '0.8rem', color: '#475569', fontWeight: 600, borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc', position: 'sticky', top: 0, zIndex: 1 }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {closedRequests.map((r, idx) => (
-                    <tr key={r.id} style={{ backgroundColor: idx % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
-                      <td style={{ padding: '9px 14px', fontSize: '0.85rem', color: '#0f172a' }}>{r.id}</td>
-                      <td style={{ padding: '9px 14px', fontSize: '0.85rem', color: '#0f172a' }}>{r.patient}</td>
-                      <td style={{ padding: '9px 14px', fontSize: '0.85rem', color: '#0f172a' }}>{r.topic}</td>
-                      <td style={{ padding: '9px 14px', fontSize: '0.85rem', color: '#0f172a' }}>{r.unit}</td>
-                      <td style={{ padding: '9px 14px', fontSize: '0.85rem', color: '#0f172a' }}>{r.district}</td>
-                      <td style={{ padding: '9px 14px', fontSize: '0.85rem', color: '#0f172a' }}>{r.handler}</td>
-                      <td style={{ padding: '9px 14px', fontSize: '0.85rem', color: '#0f172a' }}>{r.createdAt}</td>
-                      <td style={{ padding: '9px 14px', fontSize: '0.85rem', color: '#16a34a', fontWeight: 600 }}>{r.closedAt}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* הטבלה נפתחת דרך RequestsModal ב-MainLayout */}
     </div>
   );
 }

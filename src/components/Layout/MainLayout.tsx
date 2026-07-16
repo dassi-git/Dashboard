@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Select from 'react-select';
 import DashboardCharts from '../Charts/DashboardCharts';
 import RequestsModal from '../Modal/RequestsModal';
@@ -6,14 +6,14 @@ import KpiCards from './KpiCards';
 import useDashboardData from './useDashboardData';
 
 const pageStyle: React.CSSProperties = {
-  height: '100vh',
+  height: '100dvh',
+  maxHeight: '100dvh',
   backgroundColor: '#f8fafc',
   color: '#334155',
   fontFamily: 'Inter, system-ui, sans-serif',
-  padding: '2px 2px 8px',
+  padding: '4px 4px 6px',
   direction: 'rtl',
-  overflowX: 'hidden',
-  overflowY: 'auto',
+  overflow: 'hidden',
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
@@ -24,10 +24,10 @@ const pageInnerStyle: React.CSSProperties = {
   margin: 0,
   display: 'grid',
   gridTemplateRows: 'auto auto 1fr',
-  gap: '1px',
-  height: '100%',
-  minHeight: 0,
+  gap: '4px',
   flex: 1,
+  minHeight: 0,
+  overflow: 'hidden',
 };
 
 const titleStyle: React.CSSProperties = {
@@ -38,12 +38,13 @@ const titleStyle: React.CSSProperties = {
 
 const chartsWrapperStyle: React.CSSProperties = {
   backgroundColor: '#f1f5f9',
-  borderRadius: '24px',
-  padding: '1rem',
+  borderRadius: '16px',
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)',
   minHeight: 0,
-  height: '100%',
   overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+  padding: '4px',
 };
 
 export default function MainLayout() {
@@ -66,16 +67,37 @@ export default function MainLayout() {
     modalInitialUnit,
     modalInitialHandler,
     modalInitialDistrict,
+    modalInitialKpiType,
     closeRequestsModal,
     isLoading,
     error,
     handleRetry,
+    transitionVersion,
   } = useDashboardData();
+
+  const [isClosedModalOpen, setIsClosedModalOpen] = useState(false);
+  const [isContentVisible, setIsContentVisible] = useState(false);
+
+  useEffect(() => {
+    if (isLoading) {
+      setIsContentVisible(false);
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => setIsContentVisible(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, [isLoading]);
 
   const hasSelectedUnitNoData = !isLoading && !error && selectedUnit !== 'all' && unitFilteredRequests.length === 0;
 
   return (
     <div style={pageStyle}>
+      <style>{`
+        @keyframes dashboard-shimmer {
+          0% { transform: translateX(-120%); }
+          100% { transform: translateX(220%); }
+        }
+      `}</style>
       <div style={pageInnerStyle}>
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', padding: '3px 0' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
@@ -240,13 +262,10 @@ export default function MainLayout() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ color: '#475569', textAlign: 'left', whiteSpace: 'nowrap' }}>{new Date().toLocaleString()}</div>
-            <button type="button" onClick={() => window.location.reload()} style={{ padding: '0.5rem 0.75rem', borderRadius: 10, border: 'none', background: '#0ea5b3', color: '#fff', cursor: 'pointer' }}>רענון</button>
-          </div>
+          <div style={{ color: '#475569', textAlign: 'left', whiteSpace: 'nowrap' }}>{new Date().toLocaleString()}</div>
         </header>
 
-        <section style={{ padding: '0' }}>
+        <section style={{ padding: '0', minHeight: 0, overflow: 'visible' }}>
           {error ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', minHeight: '120px', backgroundColor: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '18px', color: '#be123c', padding: '1rem', boxShadow: '0 1px 2px rgba(15,23,42,0.08)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.95rem', fontWeight: 700 }}>
@@ -264,76 +283,110 @@ export default function MainLayout() {
           ) : isLoading ? (
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '80px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '18px',
-                color: '#475569',
-                fontSize: '1rem',
-                fontWeight: 600,
-                boxShadow: '0 1px 2px rgba(15,23,42,0.08)',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                gap: '0.8rem',
+                minHeight: '90px',
               }}
             >
-              טוען נתונים...
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '18px',
+                    minHeight: '84px',
+                    boxShadow: '0 1px 2px rgba(15,23,42,0.08)',
+                    padding: '0.9rem',
+                  }}
+                >
+                  <div style={{ height: '10px', width: '60%', backgroundColor: '#e2e8f0', borderRadius: '999px', marginBottom: '0.6rem' }} />
+                  <div style={{ height: '16px', width: '80%', backgroundColor: '#f1f5f9', borderRadius: '999px', marginBottom: '0.45rem' }} />
+                  <div style={{ height: '10px', width: '45%', backgroundColor: '#e2e8f0', borderRadius: '999px' }} />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)',
+                      transform: 'translateX(-120%)',
+                      animation: 'dashboard-shimmer 1.2s ease-in-out infinite',
+                    }}
+                  />
+                </div>
+              ))}
             </div>
           ) : (
-            <KpiCards data={kpiData} activeKpi={activeKpi} onKpiSelect={handleKpiSelect} closedRequests={closedRequests} />
+            <div
+              style={{
+                opacity: isContentVisible ? 1 : 0,
+                transform: isContentVisible ? 'translateY(0)' : 'translateY(8px)',
+                transition: 'opacity 500ms cubic-bezier(0.22, 1, 0.36, 1), transform 500ms cubic-bezier(0.22, 1, 0.36, 1)',
+                willChange: 'opacity, transform',
+              }}
+            >
+              <KpiCards data={kpiData} activeKpi={activeKpi} onKpiSelect={handleKpiSelect} closedRequests={closedRequests} onOpenClosedRequests={() => setIsClosedModalOpen(true)} transitionVersion={transitionVersion} />
+            </div>
           )}
         </section>
 
-        <section style={{ ...chartsWrapperStyle, display: 'grid', gridTemplateRows: 'auto 1fr', gap: '2px', padding: '2px', height: '100%' }}>
+        <section style={{ ...chartsWrapperStyle, minHeight: 0, flex: 1 }}>
           {isLoading ? (
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: '0.9rem',
                 width: '100%',
                 height: '100%',
                 minHeight: '220px',
-                backgroundColor: '#ffffff',
-                borderRadius: '18px',
-                border: '1px solid #e2e8f0',
-                color: '#475569',
-                fontSize: '1rem',
-                fontWeight: 600,
-                boxShadow: '0 1px 2px rgba(15,23,42,0.08)',
               }}
             >
-              טוען נתונים...
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '20px',
+                    minHeight: '180px',
+                    boxShadow: '0 1px 2px rgba(15,23,42,0.08)',
+                    padding: '1rem',
+                  }}
+                >
+                  <div style={{ height: '12px', width: '55%', backgroundColor: '#e2e8f0', borderRadius: '999px', marginBottom: '0.75rem' }} />
+                  <div style={{ height: '120px', width: '100%', backgroundColor: '#f8fafc', borderRadius: '14px' }} />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%)',
+                      transform: 'translateX(-120%)',
+                      animation: 'dashboard-shimmer 1.2s ease-in-out infinite',
+                    }}
+                  />
+                </div>
+              ))}
             </div>
           ) : (
-            <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  {/* <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>דשבורד גרפים</div> */}
-                  {/* <button
-                    type="button"
-                    onClick={handleOpenRequests}
-                    aria-haspopup="dialog"
-                    aria-controls="requests-modal"
-                    aria-label="פתח טבלת פניות"
-                    style={{
-                      border: '1px solid rgba(14, 165, 233, 0.9)',
-                      background: 'linear-gradient(180deg, #06b6d4, #0891b2)',
-                      color: '#fff',
-                      padding: '4px 8px',
-                      borderRadius: '10px',
-                      cursor: 'pointer',
-                      fontWeight: 700,
-                      fontSize: '0.8rem',
-                    }}
-                  >
-                    פתח טבלת פניות
-                  </button> */}
-                </div>
-                {/* <span style={{ color: '#475569', fontSize: '0.8rem' }}>לחיצה על גרף תפתח את טבלת הפניות</span> */}
-              </div>
-
-              <div style={{ height: '100%', width: '100%', minHeight: 0, overflow: 'hidden', position: 'relative' }}>
+            <div
+              style={{
+                opacity: isContentVisible ? 1 : 0,
+                transform: isContentVisible ? 'translateY(0)' : 'translateY(10px)',
+                transition: 'opacity 650ms cubic-bezier(0.22, 1, 0.36, 1) 70ms, transform 650ms cubic-bezier(0.22, 1, 0.36, 1) 70ms',
+                willChange: 'opacity, transform',
+                height: '100%',
+                width: '100%',
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', position: 'relative' }}>
                 <DashboardCharts
                   districtsData={chartData.districtsData}
                   statusesData={chartData.statusesData}
@@ -345,6 +398,10 @@ export default function MainLayout() {
                   slaBreaches={chartData.slaBreaches}
                   onChartClick={handleOpenRequests}
                   handlersData={chartData.handlersData}
+                  topicsByUnit={chartData.topicsByUnit}
+                  activeKpi={activeKpi}
+                  closedRequests={closedRequests}
+                  transitionVersion={transitionVersion}
                 />
                 {hasSelectedUnitNoData && (
                   <div
@@ -419,7 +476,7 @@ export default function MainLayout() {
                   </div>
                 )}
               </div>
-            </>
+            </div>
           )}
         </section>
       </div>
@@ -427,11 +484,22 @@ export default function MainLayout() {
       <RequestsModal
         isOpen={isModalOpen}
         onClose={() => closeRequestsModal()}
-        allRequests={data?.requests ?? unitFilteredRequests}
-        initialDistrict={modalInitialDistrict ?? selectedDistrict}
-        initialUnit={modalInitialUnit ?? selectedUnit}
+        allRequests={
+          (modalInitialKpiType ?? activeKpi) === 'closed_30d'
+            ? closedRequests
+            : (data?.allRequests ?? data?.requests ?? unitFilteredRequests)
+        }
+        initialDistrict={modalInitialDistrict ?? (selectedDistrict !== 'all' ? selectedDistrict : undefined)}
+        initialUnit={modalInitialUnit ?? (selectedUnit !== 'all' ? selectedUnit : undefined)}
         initialHandler={modalInitialHandler}
-        initialKpiType={activeKpi}
+        initialKpiType={modalInitialKpiType ?? activeKpi}
+      />
+
+      <RequestsModal
+        isOpen={isClosedModalOpen}
+        onClose={() => setIsClosedModalOpen(false)}
+        allRequests={closedRequests}
+        initialKpiType={null}
       />
     </div>
   );

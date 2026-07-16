@@ -61,16 +61,11 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
   const buildInitialDraftState = (): AdvancedFilterState => ({
     selectedDistricts: initialFilters?.initialDistrict && initialFilters.initialDistrict !== 'all' ? [initialFilters.initialDistrict] : [],
     selectedUnits: initialFilters?.initialUnit && initialFilters.initialUnit !== 'all' ? [initialFilters.initialUnit] : [],
-    selectedHandlers: initialFilters?.initialHandler ? [initialFilters.initialHandler] : [],
+    selectedHandlers: initialFilters?.initialHandler ? [initialFilters.initialHandler] : [], // handler = department name
     generalSearch: '',
     startDate: '',
     endDate: '',
   });
-
-  const applyInitialFilters = (nextState: AdvancedFilterState) => {
-    setDraftFilters(nextState);
-    setAppliedFilters(nextState);
-  };
 
   const getInitialActiveFilters = (): FilterType[] => {
     if (!initialFilters?.initialKpiType || initialFilters.initialKpiType === 'total') return ['all'];
@@ -88,9 +83,17 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   useEffect(() => {
-    const nextDraftState = buildInitialDraftState();
+    const nextDraftState: AdvancedFilterState = {
+      selectedDistricts: initialFilters?.initialDistrict && initialFilters.initialDistrict !== 'all' ? [initialFilters.initialDistrict] : [],
+      selectedUnits: initialFilters?.initialUnit && initialFilters.initialUnit !== 'all' ? [initialFilters.initialUnit] : [],
+      selectedHandlers: initialFilters?.initialHandler ? [initialFilters.initialHandler] : [],
+      generalSearch: '',
+      startDate: '',
+      endDate: '',
+    };
     setActiveFilters(getInitialActiveFilters());
-    applyInitialFilters(nextDraftState);
+    setDraftFilters(nextDraftState);
+    setAppliedFilters(nextDraftState);
   }, [initialFilters?.initialDistrict, initialFilters?.initialUnit, initialFilters?.initialHandler, initialFilters?.initialKpiType]);
 
   useEffect(() => {
@@ -150,7 +153,7 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
       if (
         appliedFilters.selectedHandlers.length > 0 &&
         !appliedFilters.selectedHandlers.includes(ALL_SELECTED) &&
-        !appliedFilters.selectedHandlers.includes(request.handler)
+        !appliedFilters.selectedHandlers.includes(request.department)
       )
         return false;
 
@@ -250,6 +253,24 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
     setAppliedFilters(draftFilters);
   };
 
+  const removeAppliedDistrict = (district: string) => {
+    const next = appliedFilters.selectedDistricts.filter((d) => d !== district);
+    setDraftFilters((prev) => ({ ...prev, selectedDistricts: next }));
+    setAppliedFilters((prev) => ({ ...prev, selectedDistricts: next }));
+  };
+
+  const removeAppliedUnit = (unit: string) => {
+    const next = appliedFilters.selectedUnits.filter((u) => u !== unit);
+    setDraftFilters((prev) => ({ ...prev, selectedUnits: next }));
+    setAppliedFilters((prev) => ({ ...prev, selectedUnits: next }));
+  };
+
+  const removeAppliedHandler = (handler: string) => {
+    const next = appliedFilters.selectedHandlers.filter((h) => h !== handler);
+    setDraftFilters((prev) => ({ ...prev, selectedHandlers: next }));
+    setAppliedFilters((prev) => ({ ...prev, selectedHandlers: next }));
+  };
+
   const clearAll = () => {
     const resetState = buildInitialDraftState();
     setActiveFilters(getInitialActiveFilters());
@@ -325,6 +346,9 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
     exportToCsv,
     sortOrder,
     setSortOrder,
+    removeAppliedDistrict,
+    removeAppliedUnit,
+    removeAppliedHandler,
   } as const;
 }
 

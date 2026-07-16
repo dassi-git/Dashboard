@@ -17,6 +17,7 @@ import TopicsByUnitChart from './TopicsByUnitChart.tsx';
 import UnitsPieChart from './UnitsPieChart.tsx';
 import SlaByUnitChart from './SlaByUnitChart.tsx';
 import HandlersChart from './HandlersChart.tsx';
+import type { RequestItem } from '../../services/api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Legend, Tooltip, Title);
 
@@ -30,7 +31,11 @@ export type DashboardChartsProps = {
   slaActivity?: number[];
   slaBreaches?: number[];
   handlersData: number[];
-  onChartClick?: (selection?: { unit?: string; handler?: string; district?: string } | string) => void;
+  topicsByUnit?: number[][];
+  activeKpi?: string | null;
+  closedRequests?: RequestItem[];
+  onChartClick?: (selection?: { unit?: string; handler?: string; district?: string; kpiType?: string } | string) => void;
+  transitionVersion?: number;
 };
 
 const rowStyle: React.CSSProperties = {
@@ -84,33 +89,51 @@ export default function DashboardCharts({
   slaActivity,
   slaBreaches,
   handlersData,
+  topicsByUnit,
+  activeKpi,
+  closedRequests,
   onChartClick,
+  transitionVersion = 0,
 }: DashboardChartsProps) {
+  // key שמשתנה בכל פעם שהנתונים משתנים — גורם לכל גרף להרכיב מחדש ולהריץ אנימציית כניסה
+  const chartKey = React.useMemo(() => {
+    const fingerprint = [
+      districtsData.join(','),
+      statusesData.join(','),
+      unitsData.slice(0, 10).join(','),
+      handlersData.join(','),
+      slaActivity?.slice(0, 5).join(',') ?? '',
+      activeKpi ?? '',
+      closedRequests?.length ?? 0,
+    ].join('|');
+    return fingerprint;
+  }, [districtsData, statusesData, unitsData, handlersData, slaActivity, activeKpi, closedRequests]);
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', gap: '12px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', gap: 'clamp(4px, 0.8vh, 12px)', minHeight: 0 }}>
       <style>{responsiveStyle}</style>
-      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', gap: '20px' }}>
-        <div className="dashboard-charts-row" style={{ ...rowStyle, flex: 1, minHeight: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', gap: 'clamp(4px, 0.8vh, 12px)', minHeight: 0 }}>
+        <div className="dashboard-charts-row" style={{ ...rowStyle, flex: 1, minHeight: 0, gap: 'clamp(4px, 0.8vw, 12px)' }}>
           <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <DistrictsChart districtsData={districtsData} onChartClick={onChartClick} />
+            <DistrictsChart key={`districts-${chartKey}-${transitionVersion}`} districtsData={districtsData} onChartClick={onChartClick} />
           </div>
           <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <SlaByUnitChart slaActivity={slaActivity ?? []} slaBreaches={slaBreaches ?? []} unitsData={unitsData} onChartClick={onChartClick} />
+            <SlaByUnitChart key={`sla-${chartKey}-${transitionVersion}`} slaActivity={slaActivity ?? []} slaBreaches={slaBreaches ?? []} unitsData={unitsData} onChartClick={onChartClick} />
           </div>
           <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <StatusPieChart statusesData={statusesData} closedCount={closedCount} onChartClick={onChartClick} />
+            <StatusPieChart key={`status-${chartKey}-${transitionVersion}`} statusesData={statusesData} closedCount={closedCount} activeKpi={activeKpi} closedRequests={closedRequests} onChartClick={onChartClick} />
           </div>
         </div>
 
-        <div className="dashboard-charts-second-row" style={{ ...secondRowStyle, flex: 1, minHeight: 0 }}>
+        <div className="dashboard-charts-second-row" style={{ ...secondRowStyle, flex: 1, minHeight: 0, gap: 'clamp(4px, 0.8vw, 12px)' }}>
           <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <UnitsPieChart unitsData={unitsData} onChartClick={onChartClick} />
+            <UnitsPieChart key={`units-${chartKey}-${transitionVersion}`} unitsData={unitsData} onChartClick={onChartClick} activeKpi={activeKpi} closedRequests={closedRequests} />
           </div>
           <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <HandlersChart handlersData={handlersData} onChartClick={onChartClick} />
+            <HandlersChart key={`handlers-${chartKey}-${transitionVersion}`} handlersData={handlersData} onChartClick={onChartClick} />
           </div>
           <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <TopicsByUnitChart filteredUnits={filteredUnits} selectedUnit={selectedUnit} onChartClick={onChartClick} />
+            <TopicsByUnitChart key={`topics-${chartKey}-${transitionVersion}`} filteredUnits={filteredUnits} selectedUnit={selectedUnit} topicsByUnit={topicsByUnit} onChartClick={onChartClick} />
           </div>
         </div>
       </div>

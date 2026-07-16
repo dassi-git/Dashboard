@@ -250,7 +250,7 @@ const errorMessageStyle: React.CSSProperties = {
   direction: 'rtl',
 };
 
-const handlerOptions = ['תומר', 'גיא', 'נועה', 'עדי', 'רועי'];
+const departmentOptions = ['מחלקה פנימית', 'מחלקה כירורגית', 'מחלקת ילדים', 'מחלקת נשים', 'מחלקת אורתופדיה'];
 
 interface FilterCardProps {
   title: string;
@@ -277,20 +277,96 @@ const FilterCard: React.FC<FilterCardProps> = ({
   const visibleOptions = ['הכל', ...filteredOptions];
 
   const isChecked = (option: string) => {
-    if (option === 'הכל') {
-      return selectedValues.includes('הכל');
-    }
+    if (option === 'הכל') return selectedValues.includes('הכל');
     return selectedValues.includes(option);
   };
+
+  // בחירות פעילות (ללא "הכל")
+  const activeSelections = selectedValues.filter((v) => v !== 'הכל');
 
   return (
     <div style={cardStyle}>
       <div style={cardHeaderStyle}>
-        <span style={cardTitleStyle}>{title}</span>
-        <button type="button" onClick={onToggleOpen} style={cardToggleStyle} aria-expanded={isOpen}>
-          {isOpen ? '−' : '+'}
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <span style={cardTitleStyle}>{title}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {/* תג מספר בחירות */}
+              {activeSelections.length > 0 && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: '20px',
+                  height: '20px',
+                  borderRadius: '9999px',
+                  backgroundColor: '#2563eb',
+                  color: '#ffffff',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  padding: '0 5px',
+                }}>
+                  {activeSelections.length}
+                </span>
+              )}
+              <button type="button" onClick={onToggleOpen} style={cardToggleStyle} aria-expanded={isOpen}>
+                {isOpen ? '−' : '+'}
+              </button>
+            </div>
+          </div>
+
+          {/* Tags של הבחירות הפעילות — גלויות תמיד */}
+          {activeSelections.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', direction: 'rtl' }}>
+              {activeSelections.map((val) => (
+                <span
+                  key={val}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '2px 8px 2px 5px',
+                    borderRadius: '9999px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    backgroundColor: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    color: '#1d4ed8',
+                    maxWidth: '100%',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onToggleOption(val); }}
+                    aria-label={`הסר ${val}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '14px',
+                      height: '14px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      backgroundColor: '#bfdbfe',
+                      color: '#1d4ed8',
+                      cursor: 'pointer',
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      padding: 0,
+                      flexShrink: 0,
+                    }}
+                  >
+                    ×
+                  </button>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{val}</span>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
       {isOpen && (
         <div style={cardBodyStyle}>
           <div style={cardSearchStyle}>
@@ -469,9 +545,9 @@ const ModalSidebar: React.FC<ModalSidebarProps> = ({ isOpen, filters, clearAll }
           onSearchChange={setHandlerSearch}
           isOpen={isHandlerOpen}
           onToggleOpen={() => setIsHandlerOpen((open) => !open)}
-          options={handlerOptions}
+          options={departmentOptions}
           selectedValues={filters.selectedHandlers}
-          onToggleOption={(value) => toggleMultiSelectValue(value, filters.selectedHandlers, filters.setSelectedHandlers, handlerOptions)}
+          onToggleOption={(value) => toggleMultiSelectValue(value, filters.selectedHandlers, filters.setSelectedHandlers, departmentOptions)}
         />
       </div>
 

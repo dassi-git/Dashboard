@@ -118,19 +118,38 @@ const generateRequests = () => {
     return items[items.length - 1];
   };
 
-  // יחידות בעומס גבוה (60% מהפניות)
+  // יחידות בעומס גבוה (60% מהפניות הפתוחות)
   const highLoadUnits = ['יחידה 3', 'יחידה 12', 'יחידה 25', 'יחידה 40'];
-  
+
+  // יחידות עם שיעור סגירה גבוה — שונות מהיחידות בעומס גבוה
+  const highClosureUnits = ['יחידה 7', 'יחידה 18', 'יחידה 33', 'יחידה 45'];
+
+  // לכל יחידה: סיכוי ל-handled — יחידות עם שיעור סגירה גבוה מקבלות ~55%, יחידות עומס גבוה ~15%, שאר ~25%
+  const getStatusWeightsForUnit = (unit: string): number[] => {
+    if (highClosureUnits.includes(unit)) {
+      // new=0.20, treatment=0.25, handled=0.55
+      return [0.20, 0.25, 0.55];
+    }
+    if (highLoadUnits.includes(unit)) {
+      // new=0.42, treatment=0.43, handled=0.15 — צוברות פניות פתוחות
+      return [0.42, 0.43, 0.15];
+    }
+    // שאר היחידות — חלוקה רגילה
+    return [0.35, 0.40, 0.25];
+  };
+
+  const statusWeights = [0.35, 0.40, 0.25]; // fallback — לא בשימוש ישיר עוד
+  void statusWeights;
+
   // משקלות לנושאים - נושא 1 ו-3 משמעותיים יותר
   const topicWeights = [0.25, 0.15, 0.25, 0.18, 0.17];
-  
+
   // משקלות למטפלים - גוון בעומס
   const handlerWeights = [0.28, 0.24, 0.20, 0.15, 0.13];
-  
+
   // משקלות למחוזות - גוון בהתפלגות
   const districtWeights = [0.35, 0.25, 0.22, 0.18];
-  
-  const statusWeights = [0.35, 0.40, 0.25];
+
   let idCounter = 1;
 
   while (requests.length < totalRequests) {
@@ -140,24 +159,25 @@ const generateRequests = () => {
       // 60% - יחידות בעומס גבוה
       unit = pickRandom(highLoadUnits);
     } else {
-      // 40% - יחידות אחרות
+      // 40% - יחידות אחרות (כולל יחידות עם שיעור סגירה גבוה)
       const otherUnits = unitLabels.filter(u => !highLoadUnits.includes(u));
       unit = pickRandom(otherUnits);
     }
-    
+
+    // בחירת סטטוס לפי פרופיל היחידה
+    const unitStatusWeights = getStatusWeightsForUnit(unit);
+    const status = pickWeighted(statusMap, unitStatusWeights);
+
     // בחירת מחוז עם משקל מותאם
     const district = pickWeighted(districtLabels, districtWeights);
-    
+
     // בחירת נושא עם משקל משמעותי
     const topic = pickWeighted(topicLabels, topicWeights);
-    
+
     // בחירת מטפל עם משקל מותאם
     const handler = pickWeighted(handlerLabels, handlerWeights);
     const department = pickRandom(departmentLabels);
-    
-    // בחירת סטטוס
-    const status = pickWeighted(statusMap, statusWeights);
-    
+
     // הסתברות גבוהה יותר ליחידות בעומס גבוה
     const isHighLoadUnit = highLoadUnits.includes(unit);
 
@@ -200,7 +220,7 @@ const initializeDbRequests = () => {
   }
 
   // כל עדכון לקוד יתנקה את ה-localStorage ויוצר נתונים חדשים
-  const CACHE_VERSION = '4.1';
+  const CACHE_VERSION = '4.3';
   const stored = localStorage.getItem('dashboard_requests');
   const storedVersion = localStorage.getItem('dashboard_requests_version');
   
@@ -287,7 +307,7 @@ const computeChartData = (filteredRequests: RequestItem[], selectedUnit?: string
   const statusesData = statusMap.map((status) => filteredRequests.filter((request) => request.statusType === status.type).length);
   const unitsData = unitLabels.map((label) => filteredRequests.filter((request) => request.unit === label).length);
   const topicsData = topicLabels.map((label) => filteredRequests.filter((request) => request.topic === label).length);
-  const handlersData = handlerLabels.map((label) => filteredRequests.filter((request) => request.handler === label).length);
+  const handlersData = departmentLabels.map((label) => filteredRequests.filter((request) => request.department === label).length);
 
   const topicsByUnit = unitLabels.map((unit) =>
     topicLabels.map((topic) => filteredRequests.filter((request) => request.unit === unit && request.topic === topic).length),

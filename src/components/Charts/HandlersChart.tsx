@@ -6,15 +6,15 @@ type Props = {
   onChartClick?: (selection?: { unit?: string; handler?: string } | string) => void;
 };
 
-const handlerLabels = ['תומר', 'גיא', 'נועה', 'עדי', 'רועי'];
+const departmentLabels = ['מחלקה פנימית', 'מחלקה כירורגית', 'מחלקת ילדים', 'מחלקת נשים', 'מחלקת אורתופדיה'];
 const handlerColors = ['#60a5fa', '#d8b4fe', '#fb923c', '#fca5a5', '#86efac'];
 
 export default function HandlersChart({ handlersData, onChartClick }: Props) {
   const data = {
-    labels: handlerLabels,
+    labels: departmentLabels,
     datasets: [
       {
-        label: 'גורמי מטפלים',
+        label: 'גורם מטפל',
         data: handlersData,
         backgroundColor: handlerColors,
         borderRadius: 6,
@@ -25,8 +25,16 @@ export default function HandlersChart({ handlersData, onChartClick }: Props) {
   const options = {
     maintainAspectRatio: false,
     responsive: true,
+    animation: {
+      duration: 650,
+      easing: 'easeOutQuad' as const,
+      delay: (context: any) => (context.type === 'data' ? context.dataIndex * 12 : 0),
+    },
     layout: {
       padding: { top: 20, right: 10, left: 10, bottom: 20 },
+    },
+    onHover: (_event: any, elements: any[], chart: any) => {
+      chart.canvas.style.cursor = elements.length > 0 ? 'pointer' : 'default';
     },
     plugins: {
       legend: {
@@ -60,10 +68,10 @@ export default function HandlersChart({ handlersData, onChartClick }: Props) {
     id: 'handlerClick',
     afterEvent(chart: any, args: any) {
       if (args.event.type !== 'click') return;
-      const points = chart.getElementsAtEventForMode(args.event, 'nearest', { intersect: true }, true);
+      const points = chart.getElementsAtEventForMode(args.event.native ?? args.event, 'nearest', { intersect: true }, true);
       if (points.length === 0) return;
       const firstPoint = points[0];
-      const label = handlerLabels[firstPoint.index];
+      const label = departmentLabels[firstPoint.index];
       if (label) {
         onChartClick?.({ handler: label });
       }
@@ -71,16 +79,16 @@ export default function HandlersChart({ handlersData, onChartClick }: Props) {
   };
 
   return (
-    <ChartCard title="חלוקה לפי גורם מטפלים" style={{ height: '100%', minHeight: 0, maxHeight: '100%' }}>
+    <ChartCard title="חלוקה לפי גורם מטפל" style={{ height: '100%', minHeight: 0, maxHeight: '100%' }} animationDelay={260} animationDuration={650}>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', justifyContent: 'space-between', boxSizing: 'border-box' }}>
         
         <div style={{ width: '100%', height: '100%', minHeight: 0, flex: 1, position: 'relative' }}>
-          <Bar data={data} options={options} plugins={[topLabelsPlugin, handlerClickPlugin]} aria-label="חלוקה לפי גורמי מטפלים" />
+          <Bar data={data} options={options} plugins={[topLabelsPlugin, handlerClickPlugin]} aria-label="חלוקה לפי גורם מטפל" />
         </div>
 
-        {/* שורת 5 הנקודות הצבעוניות - ממורכזת ומרווחת בצורה בטוחה בתחתית */}
+        {/* שורת הנקודות הצבעוניות */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '8px', paddingBottom: '4px', flexWrap: 'wrap', width: '100%' }}>
-          {handlerLabels.map((label, idx) => (
+          {departmentLabels.map((label, idx) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '6px', direction: 'rtl' }}>
               <span style={{ width: '9px', height: '9px', borderRadius: '50%', backgroundColor: handlerColors[idx], display: 'inline-block' }} />
               <span style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 600 }}>{label}</span>

@@ -1,31 +1,48 @@
 import { useMemo, useState } from 'react';
 import { Pie } from 'react-chartjs-2';
 import ChartCard from './ChartCard.tsx';
+import type { RequestItem } from '../../services/api';
 
 type Props = {
   unitsData: number[];
   onChartClick?: (selection?: { unit?: string; handler?: string } | string) => void;
   hideTableButton?: boolean;
+  activeKpi?: string | null;
+  closedRequests?: RequestItem[];
 };
 
 const unitLabels = Array.from({ length: 50 }, (_, i) => `יחידה ${i + 1}`);
 
-export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton = false }: Props) {
+export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton = false, activeKpi, closedRequests = [] }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const isClosed30d = activeKpi === 'closed_30d';
+
   // 1. Sort all 50 units dynamically based on incoming request counts
   const allUnitsSorted = useMemo(
-    () =>
-      unitLabels
+    () => {
+      if (isClosed30d) {
+        // בנה את הנתונים מ-closedRequests בלבד
+        const countByUnit: Record<string, number> = {};
+        for (const req of closedRequests) {
+          countByUnit[req.unit] = (countByUnit[req.unit] ?? 0) + 1;
+        }
+        return unitLabels
+          .map((label) => ({ label, value: countByUnit[label] ?? 0 }))
+          .filter((unit) => unit.value > 0)
+          .sort((a, b) => b.value - a.value);
+      }
+      return unitLabels
         .map((label, idx) => ({
           label,
           value: unitsData[idx] ?? 0,
         }))
         .filter(unit => unit.value > 0)
-        .sort((a, b) => b.value - a.value),
-    [unitsData]
+        .sort((a, b) => b.value - a.value);
+    },
+    [unitsData, isClosed30d, closedRequests]
   );
 
   const filteredUnits = useMemo(() => {
@@ -69,6 +86,7 @@ export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton
   const mainPieOptions = {
     maintainAspectRatio: false,
     responsive: true,
+    animation: { duration: 700, easing: 'easeOutQuad' as const, animateRotate: false, animateScale: true },
     layout: {
       padding: { top: 4, right: 4, bottom: 4, left: 4 },
     },
@@ -125,7 +143,7 @@ export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton
 
   const titleContent = (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', width: '100%' }}>
-      <span>פניות לפי יחידה</span>
+      <span>{isClosed30d ? 'פניות סגורות לפי יחידה (30 יום)' : 'פניות לפי יחידה'}</span>
       {!hideTableButton && (
         <button
           type="button"
@@ -154,7 +172,7 @@ export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton
   );
 
   return (
-    <ChartCard title={titleContent} style={{ height: '100%', minHeight: 0, maxHeight: '100%' }}>
+    <ChartCard title={titleContent} style={{ height: '100%', minHeight: 0, maxHeight: '100%' }} animationDelay={220} animationDuration={650}>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ width: '100%', height: '100%', minHeight: 0, flex: 1, paddingBottom: '8px', cursor: 'pointer' }}>
           <Pie
@@ -185,7 +203,9 @@ export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton
             }}>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', direction: 'rtl' }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', fontWeight: 700 }}>פירוט פניות מלא לפי יחידה</h3>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', fontWeight: 700 }}>
+                  {isClosed30d ? 'פירוט פניות סגורות (30 יום) לפי יחידה' : 'פירוט פניות מלא לפי יחידה'}
+                </h3>
                 <button
                   onClick={() => { setIsModalOpen(false); setSearchQuery(''); setIsDropdownOpen(false); }}
                   style={{ background: 'none', border: 'none', fontSize: '1.3rem', color: '#94a3b8', cursor: 'pointer' }}

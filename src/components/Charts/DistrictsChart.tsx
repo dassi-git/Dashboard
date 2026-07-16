@@ -25,6 +25,11 @@ export default function DistrictsChart({ districtsData, onChartClick }: Props) {
   const options = {
     maintainAspectRatio: false,
     responsive: true,
+    animation: {
+      duration: 650,
+      easing: 'easeOutQuad' as const,
+      delay: (context: any) => (context.type === 'data' ? context.dataIndex * 12 : 0),
+    },
     layout: {
       padding: { top: 20, right: 10, left: 10, bottom: 20 },
     },
@@ -71,7 +76,7 @@ export default function DistrictsChart({ districtsData, onChartClick }: Props) {
   };
 
   return (
-    <ChartCard title="התפלגות לפי מחוז" style={{ height: '100%', minHeight: 0, maxHeight: '100%' }}>
+    <ChartCard title="התפלגות לפי מחוז" style={{ height: '100%', minHeight: 0, maxHeight: '100%' }} animationDelay={80} animationDuration={650}>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', justifyContent: 'space-between', boxSizing: 'border-box' }}>
         
         <div style={{ width: '100%', height: '100%', minHeight: 0, flex: 1, position: 'relative' }}>

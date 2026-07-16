@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { KpiGridData } from '../Dashboard/KpiGrid';
 import { getDashboardData, type DashboardDataResponse } from '../../services/api';
 
@@ -59,10 +59,23 @@ export default function useDashboardData() {
   const [modalInitialUnit, setModalInitialUnit] = useState<string | undefined>(undefined);
   const [modalInitialHandler, setModalInitialHandler] = useState<string | undefined>(undefined);
   const [modalInitialDistrict, setModalInitialDistrict] = useState<string | undefined>(undefined);
+  const [modalInitialKpiType, setModalInitialKpiType] = useState<string | null | undefined>(undefined);
   const [data, setData] = useState<DashboardDataResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const [transitionVersion, setTransitionVersion] = useState(0);
+  const previousFilterSignatureRef = useRef('');
+
+  useEffect(() => {
+    const filterSignature = `${selectedUnit}|${selectedDistrict}|${activeKpi ?? 'none'}`;
+    if (previousFilterSignatureRef.current === filterSignature) {
+      return;
+    }
+
+    previousFilterSignatureRef.current = filterSignature;
+    setTransitionVersion((current) => current + 1);
+  }, [selectedUnit, selectedDistrict, activeKpi, retryKey]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -136,29 +149,37 @@ export default function useDashboardData() {
 
   const handleUnitSelect = (unitId: string) => setSelectedUnit(unitId as UnitId);
   const handleKpiSelect = (kpiType: string | null) => setActiveKpi((current) => (current === kpiType ? null : kpiType));
-  const handleOpenRequests = (selection?: { unit?: string; handler?: string; district?: string } | string) => {
+  const handleOpenRequests = (selection?: { unit?: string; handler?: string; district?: string; kpiType?: string } | string) => {
     if (typeof selection === 'string') {
-      setSelectedUnit(selection);
       setModalInitialUnit(selection);
       setModalInitialHandler(undefined);
       setModalInitialDistrict(undefined);
+      setModalInitialKpiType(undefined);
     } else if (selection?.unit) {
-      setSelectedUnit(selection.unit);
       setModalInitialUnit(selection.unit);
       setModalInitialHandler(undefined);
       setModalInitialDistrict(undefined);
+      setModalInitialKpiType(undefined);
     } else if (selection?.handler) {
       setModalInitialHandler(selection.handler);
       setModalInitialUnit(undefined);
       setModalInitialDistrict(undefined);
+      setModalInitialKpiType(undefined);
     } else if (selection?.district) {
       setModalInitialUnit(undefined);
       setModalInitialHandler(undefined);
       setModalInitialDistrict(selection.district);
+      setModalInitialKpiType(undefined);
+    } else if (selection?.kpiType) {
+      setModalInitialUnit(undefined);
+      setModalInitialHandler(undefined);
+      setModalInitialDistrict(undefined);
+      setModalInitialKpiType(selection.kpiType);
     } else {
       setModalInitialUnit(undefined);
       setModalInitialHandler(undefined);
       setModalInitialDistrict(undefined);
+      setModalInitialKpiType(undefined);
     }
     setIsModalOpen(true);
   };
@@ -168,7 +189,7 @@ export default function useDashboardData() {
     setModalInitialUnit(undefined);
     setModalInitialHandler(undefined);
     setModalInitialDistrict(undefined);
-    setSelectedUnit('all');
+    setModalInitialKpiType(undefined);
   };
 
   const handleSetSelectedDistrict = (district: string) => {
@@ -203,10 +224,12 @@ export default function useDashboardData() {
     modalInitialUnit,
     modalInitialHandler,
     modalInitialDistrict,
+    modalInitialKpiType,
     closeRequestsModal,
     data,
     isLoading,
     error,
     handleRetry,
+    transitionVersion,
   } as const;
 }

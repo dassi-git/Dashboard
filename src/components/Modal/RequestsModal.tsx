@@ -21,11 +21,6 @@ export interface RequestsModalProps {
 export const RequestsModal: React.FC<RequestsModalProps> = ({ isOpen, onClose, allRequests, initialDistrict, initialUnit, initialHandler, initialKpiType }) => {
   const filters = useRequestFilters(allRequests, { initialDistrict, initialUnit, initialHandler, initialKpiType });
 
-  React.useEffect(() => {
-    if (!isOpen) return;
-    filters.applyFilters();
-  }, [isOpen, filters.appliedFilters.selectedUnits, filters.appliedFilters.selectedHandlers]);
-
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   useEffect(() => {

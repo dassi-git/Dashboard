@@ -19,6 +19,12 @@ const RequestsModalToolbar: React.FC<ToolbarProps> = ({ filters, toggleSidebar }
       onExportCsv={filters.exportToCsv}
       sortOrder={filters.sortOrder}
       onSortOrderChange={filters.setSortOrder}
+      appliedDistricts={filters.appliedFilters.selectedDistricts}
+      appliedUnits={filters.appliedFilters.selectedUnits}
+      appliedHandlers={filters.appliedFilters.selectedHandlers}
+      onRemoveDistrict={filters.removeAppliedDistrict}
+      onRemoveUnit={filters.removeAppliedUnit}
+      onRemoveHandler={filters.removeAppliedHandler}
     />
   );
 };

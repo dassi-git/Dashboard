@@ -1,3 +1,5 @@
+import React from 'react';
+
 type FilterType = 'all' | 'urgent' | 'sla' | 'in_progress' | 'new';
 
 type Props = {
@@ -10,7 +12,16 @@ type Props = {
   onExportCsv?: () => void;
   sortOrder?: 'newest' | 'oldest';
   onSortOrderChange?: (order: 'newest' | 'oldest') => void;
+  // סינונים פעילים מהסרגל הצדדי
+  appliedDistricts?: string[];
+  appliedUnits?: string[];
+  appliedHandlers?: string[];
+  onRemoveDistrict?: (district: string) => void;
+  onRemoveUnit?: (unit: string) => void;
+  onRemoveHandler?: (handler: string) => void;
 };
+
+const ALL_SELECTED = 'הכל';
 
 export default function ModalFilterBar({
   searchTerm,
@@ -22,7 +33,20 @@ export default function ModalFilterBar({
   onExportCsv,
   sortOrder = 'newest',
   onSortOrderChange,
+  appliedDistricts = [],
+  appliedUnits = [],
+  appliedHandlers = [],
+  onRemoveDistrict,
+  onRemoveUnit,
+  onRemoveHandler,
 }: Props) {
+
+  // סינונים פעילים מהסרגל הצדדי (ללא "הכל")
+  const activeDistricts = appliedDistricts.filter((d) => d !== ALL_SELECTED);
+  const activeUnits = appliedUnits.filter((u) => u !== ALL_SELECTED);
+  const activeHandlers = appliedHandlers.filter((h) => h !== ALL_SELECTED);
+  const hasSidebarFilters = activeDistricts.length > 0 || activeUnits.length > 0 || activeHandlers.length > 0;
+
   const statusButtonStyle = (type: FilterType, isActive: boolean): React.CSSProperties => {
     const base: React.CSSProperties = {
       padding: '6px 12px',
@@ -35,46 +59,19 @@ export default function ModalFilterBar({
       color: '#475569',
     };
 
-    if (!isActive) {
-      return base;
-    }
+    if (!isActive) return base;
 
     switch (type) {
       case 'urgent':
-        return {
-          ...base,
-          backgroundColor: '#fff7ed',
-          border: '1px solid #ea580c',
-          color: '#ea580c',
-        };
+        return { ...base, backgroundColor: '#fff7ed', border: '1px solid #ea580c', color: '#ea580c' };
       case 'all':
-        return {
-          ...base,
-          backgroundColor: '#e0f2fe',
-          border: '1px solid #bae6fd',
-          color: '#0369a1',
-        };
+        return { ...base, backgroundColor: '#e0f2fe', border: '1px solid #bae6fd', color: '#0369a1' };
       case 'sla':
-        return {
-          ...base,
-          backgroundColor: '#fef2f2',
-          border: '1px solid #dc2626',
-          color: '#dc2626',
-        };
+        return { ...base, backgroundColor: '#fef2f2', border: '1px solid #dc2626', color: '#dc2626' };
       case 'in_progress':
-        return {
-          ...base,
-          backgroundColor: '#f3e8ff',
-          border: '1px solid #6b21a8',
-          color: '#6b21a8',
-        };
+        return { ...base, backgroundColor: '#f3e8ff', border: '1px solid #6b21a8', color: '#6b21a8' };
       case 'new':
-        return {
-          ...base,
-          backgroundColor: '#fef9c3',
-          border: '1px solid #854d0e',
-          color: '#854d0e',
-        };
+        return { ...base, backgroundColor: '#fef9c3', border: '1px solid #854d0e', color: '#854d0e' };
       default:
         return base;
     }
@@ -120,9 +117,41 @@ export default function ModalFilterBar({
     setActiveFilters([...nextFilters, filter]);
   };
 
+  const tagStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '5px',
+    padding: '3px 10px 3px 6px',
+    borderRadius: '9999px',
+    fontSize: '0.8rem',
+    fontWeight: 600,
+    backgroundColor: '#eff6ff',
+    border: '1px solid #bfdbfe',
+    color: '#1d4ed8',
+    direction: 'rtl',
+  };
+
+  const tagXStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '16px',
+    height: '16px',
+    borderRadius: '50%',
+    border: 'none',
+    backgroundColor: '#bfdbfe',
+    color: '#1d4ed8',
+    cursor: 'pointer',
+    fontSize: '0.7rem',
+    fontWeight: 700,
+    lineHeight: 1,
+    padding: 0,
+    flexShrink: 0,
+  };
+
   return (
     <div style={{ width: '100%', backgroundColor: '#ffffff', padding: '12px 0', display: 'flex', flexDirection: 'column', gap: '8px', fontFamily: 'sans-serif' }}>
-      
+
       {/* 1. Search Bar Row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', direction: 'rtl' }}>
         <button
@@ -255,54 +284,37 @@ export default function ModalFilterBar({
         )}
       </div>
 
-      {/* 2. Quick Filter Buttons (Chips / Badges) */}
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', direction: 'rtl', paddingRight: '4px' }}>
-        
-        {/* Chip: דחופות */}
-        <button
-          type="button"
-          onClick={() => toggleFilter('urgent')}
-          style={statusButtonStyle('urgent', activeFilters.includes('urgent'))}
-        >
-          דחוף
-        </button>
+      {/* 2. Quick Filter Buttons */}
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', direction: 'rtl', paddingRight: '4px', alignItems: 'center' }}>
+        <button type="button" onClick={() => toggleFilter('urgent')} style={statusButtonStyle('urgent', activeFilters.includes('urgent'))}>דחוף</button>
+        <button type="button" onClick={() => toggleFilter('all')} style={statusButtonStyle('all', activeFilters.includes('all'))}>הכל</button>
+        <button type="button" onClick={() => toggleFilter('sla')} style={statusButtonStyle('sla', activeFilters.includes('sla'))}>חריגות SLA</button>
+        <button type="button" onClick={() => toggleFilter('in_progress')} style={statusButtonStyle('in_progress', activeFilters.includes('in_progress'))}>בטיפול</button>
+        <button type="button" onClick={() => toggleFilter('new')} style={statusButtonStyle('new', activeFilters.includes('new'))}>חדש</button>
 
-        {/* Chip: הכל */}
-        <button
-          type="button"
-          onClick={() => toggleFilter('all')}
-          style={statusButtonStyle('all', activeFilters.includes('all'))}
-        >
-          הכל
-        </button>
-
-        {/* Chip: חריגות SLA */}
-        <button
-          type="button"
-          onClick={() => toggleFilter('sla')}
-          style={statusButtonStyle('sla', activeFilters.includes('sla'))}
-        >
-          חריגות SLA
-        </button>
-
-        {/* Chip: בטיפול */}
-        <button
-          type="button"
-          onClick={() => toggleFilter('in_progress')}
-          style={statusButtonStyle('in_progress', activeFilters.includes('in_progress'))}
-        >
-          בטיפול
-        </button>
-
-        {/* Chip: חדש */}
-        <button
-          type="button"
-          onClick={() => toggleFilter('new')}
-          style={statusButtonStyle('new', activeFilters.includes('new'))}
-        >
-          חדש
-        </button>
-
+        {/* Tags של סינונים מהסרגל הצדדי */}
+        {hasSidebarFilters && (
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', borderRight: '1px solid #e2e8f0', paddingRight: '10px', marginRight: '2px' }}>
+            {activeDistricts.map((d) => (
+              <span key={`district-${d}`} style={tagStyle}>
+                <button type="button" style={tagXStyle} onClick={() => onRemoveDistrict?.(d)} aria-label={`הסר מחוז ${d}`}>×</button>
+                {d}
+              </span>
+            ))}
+            {activeUnits.map((u) => (
+              <span key={`unit-${u}`} style={tagStyle}>
+                <button type="button" style={tagXStyle} onClick={() => onRemoveUnit?.(u)} aria-label={`הסר יחידה ${u}`}>×</button>
+                {u}
+              </span>
+            ))}
+            {activeHandlers.map((h) => (
+              <span key={`handler-${h}`} style={tagStyle}>
+                <button type="button" style={tagXStyle} onClick={() => onRemoveHandler?.(h)} aria-label={`הסר גורם מטפל ${h}`}>×</button>
+                {h}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 3. Results Indication Line */}
