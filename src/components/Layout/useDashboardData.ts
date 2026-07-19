@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { useEffect, useMemo, useState } from 'react';
-=======
 import { useEffect, useMemo, useRef, useState } from 'react';
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
 import type { KpiGridData } from '../Dashboard/KpiGrid';
 import { getDashboardData, type DashboardDataResponse } from '../../services/api';
 
@@ -59,16 +55,13 @@ export default function useDashboardData() {
   const [selectedUnit, setSelectedUnit] = useState<UnitId>('all');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [activeKpi, setActiveKpi] = useState<string | null>(null);
+  const [selectedClosedYear, setSelectedClosedYear] = useState<number>(new Date().getFullYear());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialUnit, setModalInitialUnit] = useState<string | undefined>(undefined);
   const [modalInitialHandler, setModalInitialHandler] = useState<string | undefined>(undefined);
   const [modalInitialDistrict, setModalInitialDistrict] = useState<string | undefined>(undefined);
   const [modalInitialKpiType, setModalInitialKpiType] = useState<string | null | undefined>(undefined);
   const [data, setData] = useState<DashboardDataResponse | null>(null);
-<<<<<<< HEAD
-  const [error, setError] = useState<string | null>(null);
-  const [retryKey, setRetryKey] = useState(0);
-=======
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
@@ -76,15 +69,14 @@ export default function useDashboardData() {
   const previousFilterSignatureRef = useRef('');
 
   useEffect(() => {
-    const filterSignature = `${selectedUnit}|${selectedDistrict}|${activeKpi ?? 'none'}`;
+    const filterSignature = `${selectedUnit}|${selectedDistrict}|${activeKpi ?? 'none'}|${selectedClosedYear}`;
     if (previousFilterSignatureRef.current === filterSignature) {
       return;
     }
 
     previousFilterSignatureRef.current = filterSignature;
     setTransitionVersion((current) => current + 1);
-  }, [selectedUnit, selectedDistrict, activeKpi, retryKey]);
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
+  }, [selectedUnit, selectedDistrict, activeKpi, selectedClosedYear, retryKey]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -95,23 +87,17 @@ export default function useDashboardData() {
 
   useEffect(() => {
     let isMounted = true;
-<<<<<<< HEAD
 
     const fetchData = async () => {
-=======
-    const isFirstLoad = data === null;
-
-    const fetchData = async () => {
-      if (isFirstLoad) {
-        setIsLoading(true);
-      }
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
+      setIsLoading(true);
       setError(null);
+
       try {
         const response = await getDashboardData({
           unit: selectedUnit !== 'all' ? selectedUnit : undefined,
           district: selectedDistrict !== 'all' ? selectedDistrict : undefined,
           kpiType: activeKpi,
+          closedYear: selectedClosedYear,
         });
         if (isMounted) {
           setData(response);
@@ -121,13 +107,10 @@ export default function useDashboardData() {
         if (isMounted) {
           setError('אירעה שגיאה בטעינת הנתונים. אנא נסה לרענן את העמוד או לפנות לתמיכה.');
         }
-<<<<<<< HEAD
-=======
       } finally {
-        if (isMounted && isFirstLoad) {
+        if (isMounted) {
           setIsLoading(false);
         }
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
       }
     };
 
@@ -136,7 +119,7 @@ export default function useDashboardData() {
     return () => {
       isMounted = false;
     };
-  }, [selectedUnit, selectedDistrict, activeKpi, retryKey]);
+  }, [selectedUnit, selectedDistrict, activeKpi, selectedClosedYear, retryKey]);
 
   const uniqueDistricts = useMemo(() => ['all', ...districtLabels], []);
 
@@ -144,6 +127,13 @@ export default function useDashboardData() {
     if (selectedDistrict === 'all') return unitLabels.slice();
     return unitLabels.filter((u) => unitDistrictMap[u] === selectedDistrict);
   }, [selectedDistrict]);
+
+  const closedYearOptions = useMemo(() => {
+    const startYear = 2020;
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: Math.max(1, currentYear - startYear + 1) }, (_, index) => currentYear - index);
+    return years.filter((year) => year >= startYear);
+  }, []);
 
   const unitFilteredRequests = useMemo(() => data?.requests ?? [], [data]);
   const closedRequests = useMemo(() => data?.closedRequests ?? [], [data]);
@@ -243,15 +233,13 @@ export default function useDashboardData() {
     modalInitialDistrict,
     modalInitialKpiType,
     closeRequestsModal,
+    selectedClosedYear,
+    setSelectedClosedYear,
+    closedYearOptions,
     data,
-<<<<<<< HEAD
-    error,
-    handleRetry,
-=======
     isLoading,
     error,
     handleRetry,
     transitionVersion,
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
   } as const;
 }

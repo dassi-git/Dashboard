@@ -81,6 +81,7 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
   const [appliedFilters, setAppliedFilters] = useState<AdvancedFilterState>(buildInitialDraftState);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [filterByUpdateDate] = useState(false);
 
   useEffect(() => {
     const nextDraftState: AdvancedFilterState = {
@@ -159,13 +160,17 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
 
       if (appliedFilters.startDate && request.createdAt) {
         const startDateObj = new Date(appliedFilters.startDate);
-        const requestDateObj = new Date(request.createdAt);
+        const dateToCheck = filterByUpdateDate ? request.closedAt : request.createdAt;
+        if (!dateToCheck) return false;
+        const requestDateObj = new Date(dateToCheck);
         if (requestDateObj < startDateObj) return false;
       }
 
       if (appliedFilters.endDate && request.createdAt) {
         const endDateObj = new Date(appliedFilters.endDate);
-        const requestDateObj = new Date(request.createdAt);
+        const dateToCheck = filterByUpdateDate ? request.closedAt : request.createdAt;
+        if (!dateToCheck) return false;
+        const requestDateObj = new Date(dateToCheck);
         if (requestDateObj > endDateObj) return false;
       }
 
@@ -349,6 +354,7 @@ export function useRequestFilters(allRequests: RequestItem[], initialFilters?: U
     removeAppliedDistrict,
     removeAppliedUnit,
     removeAppliedHandler,
+    filterByUpdateDate,
   } as const;
 }
 

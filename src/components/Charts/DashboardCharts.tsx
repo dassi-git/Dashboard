@@ -17,10 +17,6 @@ import TopicsByUnitChart from './TopicsByUnitChart.tsx';
 import UnitsPieChart from './UnitsPieChart.tsx';
 import SlaByUnitChart from './SlaByUnitChart.tsx';
 import HandlersChart from './HandlersChart.tsx';
-<<<<<<< HEAD
-import AnimationContext from './AnimationContext';
-=======
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
 import type { RequestItem } from '../../services/api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Legend, Tooltip, Title);
@@ -39,10 +35,7 @@ export type DashboardChartsProps = {
   activeKpi?: string | null;
   closedRequests?: RequestItem[];
   onChartClick?: (selection?: { unit?: string; handler?: string; district?: string; kpiType?: string } | string) => void;
-<<<<<<< HEAD
-=======
   transitionVersion?: number;
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
 };
 
 const rowStyle: React.CSSProperties = {
@@ -100,24 +93,6 @@ export default function DashboardCharts({
   activeKpi,
   closedRequests,
   onChartClick,
-<<<<<<< HEAD
-}: DashboardChartsProps) {
-  const combinedKey = JSON.stringify({ districtsData, statusesData, unitsData, handlersData, topicsByUnit, slaActivity, slaBreaches, activeKpi });
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', gap: 'clamp(4px, 0.8vh, 12px)', minHeight: 0 }}>
-      <style>{responsiveStyle}</style>
-      <AnimationContext.Provider value={combinedKey}>
-        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', gap: 'clamp(4px, 0.8vh, 12px)', minHeight: 0 }}>
-          <div className="dashboard-charts-row" style={{ ...rowStyle, flex: 1, minHeight: 0, gap: 'clamp(4px, 0.8vw, 12px)' }}>
-          <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <DistrictsChart districtsData={districtsData} onChartClick={onChartClick} />
-          </div>
-          <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <SlaByUnitChart slaActivity={slaActivity ?? []} slaBreaches={slaBreaches ?? []} unitsData={unitsData} onChartClick={onChartClick} />
-          </div>
-          <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <StatusPieChart statusesData={statusesData} closedCount={closedCount} activeKpi={activeKpi} closedRequests={closedRequests} onChartClick={onChartClick} />
-=======
   transitionVersion = 0,
 }: DashboardChartsProps) {
   // key שמשתנה בכל פעם שהנתונים משתנים — גורם לכל גרף להרכיב מחדש ולהריץ אנימציית כניסה
@@ -147,25 +122,11 @@ export default function DashboardCharts({
           </div>
           <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
             <StatusPieChart key={`status-${chartKey}-${transitionVersion}`} statusesData={statusesData} closedCount={closedCount} activeKpi={activeKpi} closedRequests={closedRequests} onChartClick={onChartClick} />
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
           </div>
         </div>
 
         <div className="dashboard-charts-second-row" style={{ ...secondRowStyle, flex: 1, minHeight: 0, gap: 'clamp(4px, 0.8vw, 12px)' }}>
           <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-<<<<<<< HEAD
-            <UnitsPieChart unitsData={unitsData} onChartClick={onChartClick} activeKpi={activeKpi} closedRequests={closedRequests} />
-          </div>
-          <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <HandlersChart handlersData={handlersData} onChartClick={onChartClick} />
-          </div>
-          <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
-            <TopicsByUnitChart filteredUnits={filteredUnits} selectedUnit={selectedUnit} topicsByUnit={topicsByUnit} onChartClick={onChartClick} />
-          </div>
-        </div>
-        </div>
-      </AnimationContext.Provider>
-=======
             <UnitsPieChart key={`units-${chartKey}-${transitionVersion}`} unitsData={unitsData} onChartClick={onChartClick} activeKpi={activeKpi} closedRequests={closedRequests} />
           </div>
           <div className="dashboard-chart-card-wrapper" style={cardWrapperStyle}>
@@ -176,8 +137,6 @@ export default function DashboardCharts({
           </div>
         </div>
       </div>
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
     </div>
   );
 }
-

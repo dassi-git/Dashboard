@@ -79,6 +79,8 @@ export const RequestsModal: React.FC<RequestsModalProps> = ({ isOpen, onClose, a
             gap: '0.75rem',
             padding: '0.75rem 1rem 1rem',
             overflow: 'hidden',
+            flex: 1,
+            minHeight: 0,
             transition: 'all 220ms ease-in-out',
           }}
         >
@@ -90,6 +92,7 @@ export const RequestsModal: React.FC<RequestsModalProps> = ({ isOpen, onClose, a
               gap: '1rem',
               overflow: 'hidden',
               minWidth: 0,
+              minHeight: 0,
             }}
           >
             <RequestsModalToolbar filters={filters} toggleSidebar={() => setIsSidebarOpen((c) => !c)} />

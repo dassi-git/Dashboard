@@ -61,30 +61,19 @@ export default function SlaByUnitChart({ unitsData, slaActivity, slaBreaches, on
     maintainAspectRatio: false,
     responsive: true,
     animation: {
-<<<<<<< HEAD
-      duration: 600,
-      easing: 'easeInOutQuart',
-=======
-      duration: 700,
-      easing: 'easeOutQuad' as const,
-      delay: (context: any) => (context.type === 'data' ? context.dataIndex * 10 : 0),
+      duration: 800,
+      easing: 'easeOutQuart' as const,
+      delay: (context: any) => (context.type === 'data' ? context.dataIndex * 30 : 0),
     },
     animations: {
       x: {
-        duration: 700,
-        easing: 'easeOutQuad' as const,
+        duration: 800,
+        easing: 'easeOutQuart' as const,
         from: 0,
       },
       y: {
-        duration: 700,
-        easing: 'easeOutQuad' as const,
-        from: 0,
+        duration: 0,
       },
-      colors: {
-        duration: 500,
-        easing: 'easeOutQuad' as const,
-      },
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
     },
     onHover: (_event: any, elements: any[], chart: any) => {
       chart.canvas.style.cursor = elements.length > 0 ? 'pointer' : 'default';

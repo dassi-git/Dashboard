@@ -60,17 +60,14 @@ type Props = {
   activeKpi: string | null;
   onKpiSelect: (kpiType: string | null) => void;
   closedRequests?: RequestItem[];
-<<<<<<< HEAD
-};
-
-export default function KpiGrid({ data, activeKpi, onKpiSelect }: Props) {
-=======
   onOpenClosedRequests?: () => void;
   transitionVersion?: number;
+  selectedClosedYear?: number;
+  onClosedYearChange?: (year: number) => void;
+  closedYearOptions?: number[];
 };
 
-export default function KpiGrid({ data, activeKpi, onKpiSelect, onOpenClosedRequests, transitionVersion = 0 }: Props) {
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
+export default function KpiGrid({ data, activeKpi, onKpiSelect, transitionVersion = 0, selectedClosedYear, onClosedYearChange, closedYearOptions = [] }: Props) {
 
   const cardsData = [
     {
@@ -181,10 +178,7 @@ export default function KpiGrid({ data, activeKpi, onKpiSelect, onOpenClosedRequ
                 </div>
               </div>
               <div
-<<<<<<< HEAD
-=======
                 key={`value-${transitionVersion}-${card.id}`}
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
                 style={{
                   fontSize: '1.1rem',
                   fontWeight: 700,
@@ -204,7 +198,7 @@ export default function KpiGrid({ data, activeKpi, onKpiSelect, onOpenClosedRequ
         })}
       </div>
 
-      {/* שורה שנייה - נסגרו ב-30 יום האחרונים */}
+      {/* שורה שנייה - נסגרו בשנה האחרונה */}
       <div
         onClick={() => onKpiSelect(activeKpi === 'closed_30d' ? null : 'closed_30d')}
         style={{
@@ -225,15 +219,13 @@ export default function KpiGrid({ data, activeKpi, onKpiSelect, onOpenClosedRequ
           <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: activeKpi === 'closed_30d' ? '#ffffff' : '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <CheckIcon color='#16a34a' />
           </div>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: activeKpi === 'closed_30d' ? '#16a34a' : '#475569' }}>נסגרו ב-30 יום האחרונים</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: activeKpi === 'closed_30d' ? '#16a34a' : '#475569' }}>
+            {`נסגרו בשנת ${selectedClosedYear ?? new Date().getFullYear() - 1}`}
+          </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span
-<<<<<<< HEAD
-            key={`closed`}
-=======
             key={`closed-${transitionVersion}`}
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
             style={{
               fontSize: '1.1rem',
               fontWeight: 700,
@@ -246,7 +238,29 @@ export default function KpiGrid({ data, activeKpi, onKpiSelect, onOpenClosedRequ
           >
             {data.closedLast30Days}
           </span>
-
+          {closedYearOptions.length > 0 && (
+            <select
+              value={selectedClosedYear ?? ''}
+              onClick={(event) => event.stopPropagation()}
+              onChange={(event) => onClosedYearChange?.(Number(event.target.value))}
+              style={{
+                border: '1px solid #cbd5e1',
+                borderRadius: '10px',
+                backgroundColor: '#ffffff',
+                color: '#334155',
+                padding: '4px 8px',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                minWidth: '86px',
+              }}
+              aria-label="בחר שנה"
+            >
+              {closedYearOptions.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
 

@@ -26,16 +26,16 @@ export default function HandlersChart({ handlersData, onChartClick }: Props) {
     maintainAspectRatio: false,
     responsive: true,
     animation: {
-<<<<<<< HEAD
-      duration: 600,
-      easing: 'easeInOutQuart',
-    } as const,
-=======
-      duration: 650,
-      easing: 'easeOutQuad' as const,
-      delay: (context: any) => (context.type === 'data' ? context.dataIndex * 12 : 0),
+      duration: 700,
+      easing: 'easeOutQuart' as const,
+      delay: (context: any) => context.dataIndex * 80,
     },
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
+    animations: {
+      y: {
+        duration: 700,
+        easing: 'easeOutQuart' as const,
+      },
+    },
     layout: {
       padding: { top: 20, right: 10, left: 10, bottom: 20 },
     },

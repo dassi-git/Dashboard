@@ -60,14 +60,10 @@ export default function StatusPieChart({ statusesData, closedCount, activeKpi, c
   // ── מצב closed_30d: עוגת עמידה ביעד ────────────────────────────────────────
   if (isClosed30d && slaComplianceData) {
     const { met, risky, missed } = slaComplianceData;
-<<<<<<< HEAD
-    const total = met + risky + missed;
-=======
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
 
     const slaLabels  = ['עמד ביעד', 'עמד באופן מסוכן', 'לא עמד ביעד'];
     const slaValues  = [met, risky, missed];
-    const slaColors  = ['#86efac', '#fb923c', '#fca5a5'];   // ירוק/כתום/ורוד — זהים לפלטת הפרויקט
+    const slaColors  = ['#86efac', '#fb923c', '#fca5a5'];
 
     const slaChartData = {
       labels: slaLabels,
@@ -79,35 +75,6 @@ export default function StatusPieChart({ statusesData, closedCount, activeKpi, c
       }],
     };
 
-<<<<<<< HEAD
-    const slaPercentagesPlugin = {
-      id: 'slaPercentages',
-      afterDatasetsDraw(chart: any) {
-        const { ctx, chartArea: { width, height, left, top } } = chart;
-        const cx = left + width / 2;
-        const cy = top + height / 2;
-        const meta = chart.getDatasetMeta(0);
-        meta.data.forEach((arc: any, i: number) => {
-          const value = slaValues[i];
-          if (!value) return;
-          const percent = total > 0 ? Math.round((value / total) * 100) : 0;
-          const angle = (arc.startAngle + arc.endAngle) / 2;
-          const r = arc.outerRadius * 0.65;
-          const lx = cx + Math.cos(angle) * r;
-          const ly = cy + Math.sin(angle) * r;
-          ctx.save();
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 12px Inter, system-ui, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(`${percent}%`, lx, ly);
-          ctx.restore();
-        });
-      },
-    };
-
-=======
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
     const slaClickPlugin = {
       id: 'slaSliceClick',
       afterEvent(chart: any, args: any) {
@@ -131,40 +98,27 @@ export default function StatusPieChart({ statusesData, closedCount, activeKpi, c
     };
 
     return (
-<<<<<<< HEAD
-      <ChartCard title="עמידה ביעד טיפול" style={{ height: '100%', minHeight: 0, maxHeight: '100%' }} key={`sla-${isClosed30d}`}>
-=======
       <ChartCard title="עמידה ביעד טיפול" style={{ height: '100%', minHeight: 0, maxHeight: '100%' }} animationDelay={160} animationDuration={650}>
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* עוגה */}
           <div style={{ width: '100%', height: '100%', minHeight: 0, flex: 1, paddingBottom: '8px', cursor: 'pointer' }}>
             <Pie
+              key={slaValues.join(',')}
               data={slaChartData}
               options={{
                 maintainAspectRatio: false,
                 responsive: true,
-<<<<<<< HEAD
-                animation: {
-                  duration: 600,
-                  easing: 'easeInOutQuart',
-                },
-                layout: { padding: { top: 4, right: 4, bottom: 4, left: 4 } },
-                plugins: { legend: { display: false }, tooltip: { enabled: true } },
-              }}
-              plugins={[slaPercentagesPlugin, slaClickPlugin, hoverPlugin]}
-=======
-                animation: { duration: 700, easing: 'easeOutQuad' as const, animateRotate: false, animateScale: true },
+                animation: { duration: 1200, easing: 'easeInOutQuart' as const, animateRotate: true, animateScale: false },
+                animations: {},
                 layout: { padding: { top: 4, right: 4, bottom: 4, left: 4 } },
                 plugins: { legend: { display: false }, tooltip: { enabled: true } },
               }}
               plugins={[innerLabelsPlugin, slaClickPlugin, hoverPlugin]}
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
               aria-label="עמידה ביעד טיפול"
             />
           </div>
 
-          {/* מקרא — זהה בדיוק ל-UnitsPieChart */}
+          {/* מקרא */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', paddingBottom: '4px' }}>
             {slaLabels.map((label, idx) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -221,23 +175,13 @@ export default function StatusPieChart({ statusesData, closedCount, activeKpi, c
   };
 
   return (
-<<<<<<< HEAD
-    <ChartCard title="התפלגות לפי סטטוס" style={{ height: '100%', minHeight: 0, maxHeight: '100%' }} animationDelay={140} animationDuration={650} key={`status-${isClosed30d}`}>
-=======
     <ChartCard title="התפלגות לפי סטטוס" style={{ height: '100%', minHeight: 0, maxHeight: '100%' }} animationDelay={140} animationDuration={650}>
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
       <div style={{ height: '100%', width: '100%', minHeight: 0, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Pie
+          key={values.join(',')}
           data={data}
           options={{
             ...pieOptions,
-<<<<<<< HEAD
-            animation: {
-              duration: 600,
-              easing: 'easeInOutQuart',
-            },
-=======
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
             layout: { padding: { top: 8, right: 8, left: 8, bottom: 20 } },
             plugins: {
               ...pieOptions.plugins,

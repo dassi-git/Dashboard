@@ -416,7 +416,7 @@ export interface ModalSidebarProps {
 
 const ModalSidebar: React.FC<ModalSidebarProps> = ({ isOpen, filters, clearAll }) => {
   const [dateError, setDateError] = useState<string | null>(null);
-  const [filterByCloseDate, setFilterByCloseDate] = useState(false);
+  const [filterByUpdateDate, setFilterByUpdateDate] = useState(false);
   const [districtSearch, setDistrictSearch] = useState('');
   const [unitSearch, setUnitSearch] = useState('');
   const [handlerSearch, setHandlerSearch] = useState('');
@@ -553,32 +553,32 @@ const ModalSidebar: React.FC<ModalSidebarProps> = ({ isOpen, filters, clearAll }
 
       <div style={filterSectionStyle}>
         <div style={switchWrapperStyle}>
-<<<<<<< HEAD
           <span style={switchLabelStyle}>סינון לפי תאריך עדכון</span>
-=======
-          <span style={switchLabelStyle}>סינון לפי תאריך סגירה</span>
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
           <button
             type="button"
-            onClick={() => setFilterByCloseDate((value) => !value)}
+            onClick={() => {
+              const next = !filterByUpdateDate;
+              setFilterByUpdateDate(next);
+              if (filters.setFilterByUpdateDate) filters.setFilterByUpdateDate(next);
+            }}
             style={{
               position: 'relative',
               width: '44px',
               height: '24px',
               borderRadius: '999px',
               border: '1px solid #cbd5e1',
-              backgroundColor: filterByCloseDate ? '#2563eb' : '#e2e8f0',
+              backgroundColor: filterByUpdateDate ? '#2563eb' : '#e2e8f0',
               cursor: 'pointer',
               padding: 0,
               outline: 'none',
             }}
-            aria-pressed={filterByCloseDate}
+            aria-pressed={filterByUpdateDate}
             aria-label="Toggle date filter"
           >
             <span style={{
               position: 'absolute',
               top: '2px',
-              left: filterByCloseDate ? '20px' : '2px',
+              left: filterByUpdateDate ? '20px' : '2px',
               width: '20px',
               height: '20px',
               borderRadius: '50%',
@@ -591,11 +591,7 @@ const ModalSidebar: React.FC<ModalSidebarProps> = ({ isOpen, filters, clearAll }
         <div style={dateInputRowStyle}>
           <div style={{ ...dateInputColumnStyle }}>
             <label style={filterLabelStyle} htmlFor="start-date">
-<<<<<<< HEAD
-              {filterByCloseDate ? 'עודכן מתאריך' : 'נפתח מתאריך'}
-=======
-              {filterByCloseDate ? 'סגור מתאריך' : 'נפתח מתאריך'}
->>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
+              {filterByUpdateDate ? 'עודכן מתאריך' : 'נפתח מתאריך'}
             </label>
             <div style={dateInputWrapperStyle}>
               <input

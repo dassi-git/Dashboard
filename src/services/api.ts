@@ -4,6 +4,7 @@ export type DashboardQueryDto = {
   fromDate?: string;
   toDate?: string;
   kpiType?: string | null;
+  closedYear?: number | null;
 };
 
 export type RequestItem = {
@@ -67,14 +68,17 @@ const topicLabels = ['נושא 1', 'נושא 2', 'נושא 3', 'נושא 4', 'נ
 const handlerLabels = ['תומר', 'גיא', 'נועה', 'עדי', 'רועי'];
 const departmentLabels = ['מחלקה פנימית', 'מחלקה כירורגית', 'מחלקת ילדים', 'מחלקת נשים', 'מחלקת אורתופדיה'];
 
-const initialData: ChartData = {
-  districtsData: [60, 50, 45, 40],
-  statusesData: [110, 80],
-  unitsData: Array.from({ length: unitLabels.length }, (_, index) => 3 + (index % 6) + Math.floor(index / 10)),
-  topicsData: [42, 48, 40, 36, 39],
-  handlersData: [50, 46, 42, 38, 32],
-  trendData: [55, 62, 68, 74, 70, 78, 82, 86],
-};
+const emptyChartData = (): ChartData => ({
+  districtsData: districtLabels.map(() => 0),
+  statusesData: [0, 0],
+  unitsData: Array.from({ length: unitLabels.length }, () => 0),
+  topicsData: topicLabels.map(() => 0),
+  handlersData: departmentLabels.map(() => 0),
+  topicsByUnit: undefined,
+  slaActivity: undefined,
+  slaBreaches: undefined,
+  trendData: undefined,
+});
 
 // Visible statuses for the dashboard. Exclude 'handled' (closed) statuses.
 const statusMap = [
@@ -106,6 +110,7 @@ let dbRequests: RequestItem[] = [];
 const generateRequests = () => {
   const requests: RequestItem[] = [];
   const totalRequests = 240;
+  const dayMs = 24 * 60 * 60 * 1000;
 
   const pickRandom = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
   const pickWeighted = <T,>(items: readonly T[], weights: number[]) => {
@@ -181,13 +186,15 @@ const generateRequests = () => {
     // הסתברות גבוהה יותר ליחידות בעומס גבוה
     const isHighLoadUnit = highLoadUnits.includes(unit);
 
-    const createdAtDate = new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000);
+    const now = Date.now();
+    const createdAtDate = new Date(now - Math.random() * 5 * 365 * dayMs);
     const closedAtDate = new Date(createdAtDate);
     if (status.type === 'handled') {
-      // נסגרו ב-30 יום האחרונים
-      closedAtDate.setTime(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000);
+      const maxGapMs = Math.max(0, now - createdAtDate.getTime());
+      const closureGapMs = Math.random() * Math.min(maxGapMs, 5 * 365 * dayMs);
+      closedAtDate.setTime(createdAtDate.getTime() + closureGapMs);
     } else {
-      closedAtDate.setDate(createdAtDate.getDate() + Math.floor(Math.random() * 10) + 1);
+      closedAtDate.setTime(createdAtDate.getTime() + (Math.floor(Math.random() * 10) + 1) * dayMs);
     }
 
     requests.push({
@@ -220,7 +227,7 @@ const initializeDbRequests = () => {
   }
 
   // כל עדכון לקוד יתנקה את ה-localStorage ויוצר נתונים חדשים
-  const CACHE_VERSION = '4.3';
+  const CACHE_VERSION = '4.5';
   const stored = localStorage.getItem('dashboard_requests');
   const storedVersion = localStorage.getItem('dashboard_requests_version');
   
@@ -286,20 +293,17 @@ const requestMatchesFilters = (request: RequestItem, filters: DashboardQueryDto)
 
 const computeChartData = (filteredRequests: RequestItem[], selectedUnit?: string): ChartData => {
   if (filteredRequests.length === 0) {
-    const base = initialData;
+    const base = emptyChartData();
     const topicsByUnit = (() => {
       if (!selectedUnit || selectedUnit === 'all') return undefined;
       return unitLabels.map(() => topicLabels.map(() => 0));
     })();
 
-    const slaActivity = base.unitsData.slice();
-    const slaBreaches = base.unitsData.map((v) => Math.round(v * 0.08));
-
     return {
       ...base,
       topicsByUnit,
-      slaActivity,
-      slaBreaches,
+      slaActivity: Array.from({ length: unitLabels.length }, () => 0),
+      slaBreaches: Array.from({ length: unitLabels.length }, () => 0),
     };
   }
 
@@ -361,18 +365,18 @@ export async function getDashboardData(filters: DashboardQueryDto): Promise<Dash
     fromDate: filters.fromDate,
     toDate: filters.toDate,
   };
+  const selectedClosedYear = filters.closedYear ?? new Date().getFullYear() - 1;
 
   const kpiRequests = getVisibleRequests().filter((request) => requestMatchesFilters(request, kpiFilters));
   const visibleChartRequests = getVisibleRequests().filter((request) => requestMatchesFilters(request, filters));
 
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const closedRequests = getAllRequests().filter((request) => {
     if (request.statusType !== handledStatusType) return false;
     if (kpiFilters.district && request.district !== kpiFilters.district) return false;
     const unitKey = computeUnitKey(kpiFilters.unit);
     if (unitKey && request.unit !== unitKey) return false;
-    return new Date(request.closedAt) >= thirtyDaysAgo;
+    const closedAt = new Date(request.closedAt);
+    return closedAt.getFullYear() === selectedClosedYear;
   });
 
   const chartRequests = filters.kpiType === 'closed_30d'
