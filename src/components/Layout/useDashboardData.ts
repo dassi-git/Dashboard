@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useEffect, useMemo, useState } from 'react';
+=======
 import { useEffect, useMemo, useRef, useState } from 'react';
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
 import type { KpiGridData } from '../Dashboard/KpiGrid';
 import { getDashboardData, type DashboardDataResponse } from '../../services/api';
 
@@ -61,6 +65,10 @@ export default function useDashboardData() {
   const [modalInitialDistrict, setModalInitialDistrict] = useState<string | undefined>(undefined);
   const [modalInitialKpiType, setModalInitialKpiType] = useState<string | null | undefined>(undefined);
   const [data, setData] = useState<DashboardDataResponse | null>(null);
+<<<<<<< HEAD
+  const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
+=======
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
@@ -76,6 +84,7 @@ export default function useDashboardData() {
     previousFilterSignatureRef.current = filterSignature;
     setTransitionVersion((current) => current + 1);
   }, [selectedUnit, selectedDistrict, activeKpi, retryKey]);
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -86,12 +95,17 @@ export default function useDashboardData() {
 
   useEffect(() => {
     let isMounted = true;
+<<<<<<< HEAD
+
+    const fetchData = async () => {
+=======
     const isFirstLoad = data === null;
 
     const fetchData = async () => {
       if (isFirstLoad) {
         setIsLoading(true);
       }
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
       setError(null);
       try {
         const response = await getDashboardData({
@@ -107,10 +121,13 @@ export default function useDashboardData() {
         if (isMounted) {
           setError('אירעה שגיאה בטעינת הנתונים. אנא נסה לרענן את העמוד או לפנות לתמיכה.');
         }
+<<<<<<< HEAD
+=======
       } finally {
         if (isMounted && isFirstLoad) {
           setIsLoading(false);
         }
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
       }
     };
 
@@ -227,9 +244,14 @@ export default function useDashboardData() {
     modalInitialKpiType,
     closeRequestsModal,
     data,
+<<<<<<< HEAD
+    error,
+    handleRetry,
+=======
     isLoading,
     error,
     handleRetry,
     transitionVersion,
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
   } as const;
 }

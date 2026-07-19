@@ -553,7 +553,11 @@ const ModalSidebar: React.FC<ModalSidebarProps> = ({ isOpen, filters, clearAll }
 
       <div style={filterSectionStyle}>
         <div style={switchWrapperStyle}>
+<<<<<<< HEAD
+          <span style={switchLabelStyle}>סינון לפי תאריך עדכון</span>
+=======
           <span style={switchLabelStyle}>סינון לפי תאריך סגירה</span>
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
           <button
             type="button"
             onClick={() => setFilterByCloseDate((value) => !value)}
@@ -587,7 +591,11 @@ const ModalSidebar: React.FC<ModalSidebarProps> = ({ isOpen, filters, clearAll }
         <div style={dateInputRowStyle}>
           <div style={{ ...dateInputColumnStyle }}>
             <label style={filterLabelStyle} htmlFor="start-date">
+<<<<<<< HEAD
+              {filterByCloseDate ? 'עודכן מתאריך' : 'נפתח מתאריך'}
+=======
               {filterByCloseDate ? 'סגור מתאריך' : 'נפתח מתאריך'}
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
             </label>
             <div style={dateInputWrapperStyle}>
               <input

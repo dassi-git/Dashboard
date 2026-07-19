@@ -60,11 +60,17 @@ type Props = {
   activeKpi: string | null;
   onKpiSelect: (kpiType: string | null) => void;
   closedRequests?: RequestItem[];
+<<<<<<< HEAD
+};
+
+export default function KpiGrid({ data, activeKpi, onKpiSelect }: Props) {
+=======
   onOpenClosedRequests?: () => void;
   transitionVersion?: number;
 };
 
 export default function KpiGrid({ data, activeKpi, onKpiSelect, onOpenClosedRequests, transitionVersion = 0 }: Props) {
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
 
   const cardsData = [
     {
@@ -175,7 +181,10 @@ export default function KpiGrid({ data, activeKpi, onKpiSelect, onOpenClosedRequ
                 </div>
               </div>
               <div
+<<<<<<< HEAD
+=======
                 key={`value-${transitionVersion}-${card.id}`}
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
                 style={{
                   fontSize: '1.1rem',
                   fontWeight: 700,
@@ -220,7 +229,11 @@ export default function KpiGrid({ data, activeKpi, onKpiSelect, onOpenClosedRequ
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span
+<<<<<<< HEAD
+            key={`closed`}
+=======
             key={`closed-${transitionVersion}`}
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
             style={{
               fontSize: '1.1rem',
               fontWeight: 700,

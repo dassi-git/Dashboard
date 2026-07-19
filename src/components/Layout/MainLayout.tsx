@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Select from 'react-select';
 import DashboardCharts from '../Charts/DashboardCharts';
 import RequestsModal from '../Modal/RequestsModal';
@@ -69,6 +69,15 @@ export default function MainLayout() {
     modalInitialDistrict,
     modalInitialKpiType,
     closeRequestsModal,
+<<<<<<< HEAD
+    error,
+    handleRetry,
+  } = useDashboardData();
+
+  const [isClosedModalOpen, setIsClosedModalOpen] = useState(false);
+
+  const hasSelectedUnitNoData = !error && selectedUnit !== 'all' && unitFilteredRequests.length === 0;
+=======
     isLoading,
     error,
     handleRetry,
@@ -89,6 +98,7 @@ export default function MainLayout() {
   }, [isLoading]);
 
   const hasSelectedUnitNoData = !isLoading && !error && selectedUnit !== 'all' && unitFilteredRequests.length === 0;
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
 
   return (
     <div style={pageStyle}>
@@ -280,6 +290,11 @@ export default function MainLayout() {
                 נסה שנית
               </button>
             </div>
+<<<<<<< HEAD
+          ) : (
+            <div>
+              <KpiCards data={kpiData} activeKpi={activeKpi} onKpiSelect={handleKpiSelect} closedRequests={closedRequests} />
+=======
           ) : isLoading ? (
             <div
               style={{
@@ -328,11 +343,112 @@ export default function MainLayout() {
               }}
             >
               <KpiCards data={kpiData} activeKpi={activeKpi} onKpiSelect={handleKpiSelect} closedRequests={closedRequests} onOpenClosedRequests={() => setIsClosedModalOpen(true)} transitionVersion={transitionVersion} />
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
             </div>
           )}
         </section>
 
         <section style={{ ...chartsWrapperStyle, minHeight: 0, flex: 1 }}>
+<<<<<<< HEAD
+          <div
+            style={{
+              height: '100%',
+              width: '100%',
+              minHeight: 0,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', position: 'relative' }}>
+              <DashboardCharts
+                districtsData={chartData.districtsData}
+                statusesData={chartData.statusesData}
+                closedCount={kpiData.closedLast30Days}
+                unitsData={chartData.unitsData}
+                filteredUnits={availableUnits}
+                selectedUnit={selectedUnit}
+                slaActivity={chartData.slaActivity}
+                slaBreaches={chartData.slaBreaches}
+                onChartClick={handleOpenRequests}
+                handlersData={chartData.handlersData}
+                topicsByUnit={chartData.topicsByUnit}
+                closedRequests={closedRequests}
+              />
+              {hasSelectedUnitNoData && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    backgroundColor: 'rgba(248, 250, 252, 0.95)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '1rem',
+                    zIndex: 2,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '100%',
+                      maxWidth: '540px',
+                      borderRadius: '22px',
+                      backgroundColor: '#ffffff',
+                      boxShadow: '0 20px 50px rgba(15, 23, 42, 0.12)',
+                      padding: '1.75rem 1.5rem',
+                      textAlign: 'center',
+                      position: 'relative',
+                      minHeight: '180px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      gap: '1rem',
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleUnitSelect('all')}
+                      aria-label="סגור הודעה"
+                      style={{
+                        position: 'absolute',
+                        top: '14px',
+                        right: '14px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: '#64748b',
+                        fontSize: '1.3rem',
+                        cursor: 'pointer',
+                        lineHeight: 1,
+                      }}
+                    >
+                      ×
+                    </button>
+                    <div style={{ fontSize: '2rem', lineHeight: 1, fontWeight: 700, color: '#0f172a' }}>אין פניות מיחידה זו.</div>
+                    <div style={{ color: '#475569', fontSize: '0.95rem', lineHeight: '1.6', padding: '0 0.25rem' }}>
+                      בחר יחידה אחרת כדי לראות נתונים או לחץ על &quot;×&quot; כדי לחזור להצגת כל היחידות.
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleUnitSelect('all')}
+                      style={{
+                        alignSelf: 'center',
+                        backgroundColor: '#0ea5b3',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '9999px',
+                        padding: '0.8rem 1.4rem',
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      הצג את כל היחידות
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+=======
           {isLoading ? (
             <div
               style={{
@@ -478,6 +594,7 @@ export default function MainLayout() {
               </div>
             </div>
           )}
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
         </section>
       </div>
 
@@ -485,14 +602,22 @@ export default function MainLayout() {
         isOpen={isModalOpen}
         onClose={() => closeRequestsModal()}
         allRequests={
+<<<<<<< HEAD
+          (modalInitialKpiType ?? 'closed_30d') === 'closed_30d'
+=======
           (modalInitialKpiType ?? activeKpi) === 'closed_30d'
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
             ? closedRequests
             : (data?.allRequests ?? data?.requests ?? unitFilteredRequests)
         }
         initialDistrict={modalInitialDistrict ?? (selectedDistrict !== 'all' ? selectedDistrict : undefined)}
         initialUnit={modalInitialUnit ?? (selectedUnit !== 'all' ? selectedUnit : undefined)}
         initialHandler={modalInitialHandler}
+<<<<<<< HEAD
+        initialKpiType={modalInitialKpiType ?? 'closed_30d'}
+=======
         initialKpiType={modalInitialKpiType ?? activeKpi}
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
       />
 
       <RequestsModal

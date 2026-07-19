@@ -63,10 +63,17 @@ export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton
 
   const top5Units = allUnitsSorted.slice(0, 5);
   const totalRequests = allUnitsSorted.reduce((sum, item) => sum + item.value, 0);
+<<<<<<< HEAD
+  const pieDataItems = top5Units.length > 0 ? top5Units : [];
+
+  const pieLabels = pieDataItems.map((u) => u?.label || '').filter(Boolean);
+  const pieValues = pieDataItems.map((u) => u?.value || 0);
+=======
   const pieDataItems = top5Units;
 
   const pieLabels = pieDataItems.map((u) => u.label);
   const pieValues = pieDataItems.map((u) => u.value);
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
   const pieColors = [
     '#60a5fa', '#d8b4fe', '#fb923c', '#fca5a5', '#86efac',
   ].slice(0, pieDataItems.length);
@@ -86,7 +93,14 @@ export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton
   const mainPieOptions = {
     maintainAspectRatio: false,
     responsive: true,
+<<<<<<< HEAD
+    animation: {
+      duration: 600,
+      easing: 'easeInOutQuart',
+    },
+=======
     animation: { duration: 700, easing: 'easeOutQuad' as const, animateRotate: false, animateScale: true },
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
     layout: {
       padding: { top: 4, right: 4, bottom: 4, left: 4 },
     },
@@ -183,12 +197,28 @@ export default function UnitsPieChart({ unitsData, onChartClick, hideTableButton
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', paddingBottom: '4px' }}>
+<<<<<<< HEAD
+          {pieDataItems && pieDataItems.length > 0 ? (
+            pieDataItems.map((item, idx) => {
+              const label = item?.label || `יחידה ${idx + 1}`;
+              return (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '9px', height: '9px', borderRadius: '50%', backgroundColor: pieColors[idx] || '#ccc', display: 'inline-block' }} />
+                  <span style={{ fontSize: '0.75rem', color: '#334155', fontWeight: 600 }}>{label}</span>
+                </div>
+              );
+            })
+          ) : (
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>אין נתונים להצגה</span>
+          )}
+=======
           {pieDataItems.map((u, idx) => (
             <div key={u.label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{ width: '9px', height: '9px', borderRadius: '50%', backgroundColor: pieColors[idx], display: 'inline-block' }} />
               <span style={{ fontSize: '0.75rem', color: '#334155', fontWeight: 600 }}>{u.label}</span>
             </div>
           ))}
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
         </div>
 
         {isModalOpen && (

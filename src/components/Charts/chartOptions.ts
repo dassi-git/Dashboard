@@ -1,6 +1,10 @@
 export const commonOptions = {
   maintainAspectRatio: false,
   responsive: true,
+<<<<<<< HEAD
+  animation: false,
+=======
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
   plugins: {
     legend: {
       position: 'bottom' as const,
@@ -35,7 +39,11 @@ export const pieOptions = {
   responsive: true,
   maintainAspectRatio: false,
   layout: { padding: 0 },
+<<<<<<< HEAD
+  animation: false,
+=======
   animation: { duration: 450, easing: 'easeOutQuart' as const, animateRotate: false, animateScale: true },
+>>>>>>> 91f2f6a418b7cae5c3604519a930a49c8f4f13c3
   plugins: {
     legend: { position: 'bottom' as const, labels: { usePointStyle: true, boxWidth: 10 } },
     tooltip: { enabled: true },
